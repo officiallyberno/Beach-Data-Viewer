@@ -45,18 +45,27 @@ async def scrape_rankings():
 
                 rows = table.select("tr")[1:]  # Kopfzeile überspringen
                 for r in rows:
-                    cells = [c.get_text(strip=True) for c in r.select("td")]
+                    cells = r.select("td")
                     if len(cells) < 4:
                         continue
 
-                    platz  = cells[1]
-                    punkte = cells[4]
-                    name   = cells[2]
-                    verein = cells[3] or "-"
+                
+                
+                    link_tag = cells[2].select_one("a")
+                    href = link_tag["href"]  # "spieler.php?id=55268"
+                    spieler_id = int(href.split("id=")[-1])
+
+                    platz  = cells[1].get_text(strip=True)
+                    punkte = cells[4].get_text(strip=True)
+                    name   = cells[2].get_text(strip=True)
+                    verein = cells[3].get_text(strip=True) or "-"
+
+                    print(spieler_id)
 
                     stmt = (
                         insert(Ranking)
                         .values(
+                            id=spieler_id,
                             platz=platz,
                             spieler=name,
                             verein=verein,

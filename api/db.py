@@ -43,7 +43,7 @@ class Tournament(Base):
 class Ranking(Base):
     __tablename__ = "rankings"
 
-    id         : Mapped[int]  = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id         : Mapped[int]  = mapped_column(Integer, primary_key=True)
     platz      : Mapped[str]  = mapped_column((String(120)))
     spieler    : Mapped[str]  = mapped_column(String(120))
     verein     : Mapped[str]  = mapped_column(String(120))
