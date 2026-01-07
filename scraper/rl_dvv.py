@@ -13,6 +13,7 @@ RANK_URLS = [
 ]
 
 async def scrape_rankings():
+    players = [] 
     async with async_playwright() as p:
         br = await p.chromium.launch(headless=True)
 
@@ -76,10 +77,14 @@ async def scrape_rankings():
                         .on_conflict_do_nothing()
                     )
                     await s.execute(stmt)
+                    
+                    players.append({"id": spieler_id, "name": name, "gender": gender})
+
 
             await s.commit()
 
         await br.close()
+    return players
 
 if __name__ == "__main__":
     asyncio.run(scrape_rankings())

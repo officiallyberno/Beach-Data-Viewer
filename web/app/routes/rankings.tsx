@@ -2,7 +2,9 @@ import { LoaderFunctionArgs } from "@remix-run/node";
 import {
   Form,
   json,
+  Link,
   useLoaderData,
+  useNavigate,
   useSearchParams,
   useSubmit,
 } from "@remix-run/react";
@@ -25,12 +27,18 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 
   const data: Ranking[] = await res.json();
-  const sortedData = data.sort((a, b) => a.platz - b.platz);
+  const sortedData = data
+    .sort((a, b) => a.platz - b.platz)
+    .map((item, index) => ({
+      ...item,
+      id: index,
+    }));
 
   return json({ ranks: sortedData, gender, q });
 };
 
 export type Ranking = {
+  id: number;
   platz: number;
   spieler: string;
   verein: string;
@@ -40,13 +48,14 @@ export type Ranking = {
 };
 
 export default function RankingPage() {
+  const navigate = useNavigate(); // <— hier den Hook aufrufen
+
   const {
     ranks,
     gender: genderFromLoader,
     q: qFromLoader,
   } = useLoaderData<typeof loader>();
   const [params] = useSearchParams();
-  const submit = useSubmit();
 
   // Controlled States für Formfelder
   const [gender, setGender] = useState(genderFromLoader);
@@ -58,17 +67,8 @@ export default function RankingPage() {
     setQuery(qFromLoader ?? "");
   }, [genderFromLoader, qFromLoader]);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Manuell submitten mit aktuellen State-Werten
-    const formData = new FormData();
-    formData.set("gender", gender);
-    formData.set("q", query);
-    submit(formData, { method: "get" });
-  };
-
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-3xl mx-auto mb-10 p-6">
       <h1 className="text-3xl font-bold mb-4">Rangliste 2025</h1>
 
       <Form method="get" className="flex items-center gap-4 mb-6">
@@ -100,7 +100,7 @@ export default function RankingPage() {
         </button>
       </Form>
 
-      <table className="border w-full">
+      <table className="w-full border-collapse border">
         <thead>
           <tr className="text-left">
             <th className="p-2">#</th>
@@ -111,11 +111,17 @@ export default function RankingPage() {
         </thead>
         <tbody>
           {ranks.map((r: Ranking) => (
-            <tr key={r.platz} className="">
+            <tr
+              key={r.id}
+              className="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+              onClick={() => navigate(`/players/${r.id}`)}
+            >
               <td className="p-2">{r.platz}</td>
-              <td>{r.spieler}</td>
-              <td>{r.verein}</td>
-              <td>{r.punkte}</td>
+              <td className="p-2">
+                <Link to={`/players/${r.id}`}>{r.spieler}</Link>
+              </td>
+              <td className="p-2">{r.verein}</td>
+              <td className="p-2">{r.punkte}</td>
             </tr>
           ))}
         </tbody>

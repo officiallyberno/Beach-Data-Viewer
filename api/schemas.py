@@ -21,3 +21,33 @@ class RankingSchema(BaseModel):
     punkte: str
     geschlecht: str
     saison: int
+
+
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import date
+
+class TournamentTeamSchema(BaseModel):
+    id: int
+    mannschaftsname: str
+    mannschafts_id: Optional[int]
+    verein: Optional[str]
+    anmeldedatum: Optional[date]
+    status: Optional[str]
+    doppelmeldung: Optional[str]
+    punkte_zulassung: Optional[int]
+    punkte: Optional[int]
+    platzierung: Optional[int]
+    punkte_pro_spieler: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+class TournamentTeamListSchema(BaseModel):
+    id: int
+    name: str
+    teams: List[TournamentTeamSchema] = []
+
+    class Config:
+        orm_mode = True

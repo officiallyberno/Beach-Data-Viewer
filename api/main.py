@@ -1,12 +1,14 @@
 # api/main.py (Ausschnitt)
+from sqlalchemy.orm import joinedload, selectinload
+
 from datetime import date
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 from fastapi import Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.db import Ranking, SessionLocal, Tournament
+from api.db import Player, Ranking, RankingClean, SessionLocal, Tournament, Result, TournamentTeam, TournamentVVB
 from sqlalchemy import and_, or_, select
 from fastapi import FastAPI
-from api.schemas import RankingSchema, TournamentSchema   # ← neu importieren
+from api.schemas import RankingSchema, TournamentSchema, TournamentTeamListSchema   # ← neu importieren
 
 
 app = FastAPI() 
@@ -87,3 +89,96 @@ async def get_tournament(
 
     return tournament
 
+
+@app.get("/players/{player_id}")
+async def get_player(player_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Player).where(Player.id == player_id))
+    player = result.scalar_one_or_none()
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+    return player
+
+
+@app.get("/players/{player_id}/rankings")
+async def get_player_rankings(player_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(RankingClean).where(RankingClean.player_id == player_id))
+    return result.scalars().all()
+
+
+@app.get("/players/{player_id}/results")
+async def get_player_results(player_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Result).where(Result.player_id == player_id))
+    return result.scalars().all()
+
+
+
+@app.get("/vvb")
+async def get_all_tournaments(db: AsyncSession = Depends(get_db)):
+    stmt = select(TournamentVVB)
+    result = await db.execute(stmt)
+    tournaments = result.scalars().all()
+
+    return tournaments
+
+
+@app.get("/vvb/{tournament_id}")
+async def get_tournament_by_id(
+    tournament_id: int,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = select(TournamentVVB).where(TournamentVVB.id == tournament_id)
+    result = await db.execute(stmt)
+    tournament = result.scalar_one_or_none()
+
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    return tournament
+
+@app.get("/tur_teams")
+async def get_all_tur_teams(db: AsyncSession = Depends(get_db)):
+    stmt = select(TournamentTeam)
+    result = await db.execute(stmt)
+    tournaments = result.scalars().all()
+
+    return tournaments
+
+
+@app.get("/vvb/teams", response_model=List[TournamentTeamListSchema])
+async def get_all_tournaments(db: AsyncSession = Depends(get_db)):
+    stmt = (
+        select(TournamentVVB)
+        .options(joinedload(TournamentVVB.teams))
+    )
+    result = await db.execute(stmt)
+    tournaments = result.unique().scalars().all()
+    return tournaments
+
+@app.get("/vvb/{tournament_id}/teams")
+async def get_tournament_teams(tournament_id: int, db: AsyncSession = Depends(get_db)):
+    # check if tournament exists
+    result = await db.execute(select(TournamentVVB).where(TournamentVVB.id == tournament_id))
+    tournament = result.scalar_one_or_none()
+    if not tournament:
+        raise HTTPException(status_code=404, detail="Tournament not found")
+
+    # get all teams for this tournament
+    result = await db.execute(select(TournamentTeam).where(TournamentTeam.tournament_id == tournament_id))
+    teams = result.scalars().all()
+
+    # convert to simple dicts
+    return teams
+
+@app.get("/rank/{association}/{year}")
+async def get_ranking(association: str, year:str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+    select(RankingClean)
+    .options(selectinload(RankingClean.player))       # 👈 Spieler mitladen!
+    .join(Player)
+    .filter(RankingClean.association == association)
+    .filter(RankingClean.year == year)
+    .order_by(RankingClean.rank.asc())
+)
+    players = result.scalars().all()
+
+    return players
