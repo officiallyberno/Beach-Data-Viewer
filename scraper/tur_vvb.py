@@ -43,12 +43,12 @@ async def scrape():
                 if name_tag and name_tag.get("href"):
                     detail_url = "https://www.beachvolleybb.de" + name_tag["href"]
 
-                year =datetime.today().year 
-                meldeschluss = start_meldung.split("/")[1].strip()+str(year)
-                melde_date = datetime.strptime(meldeschluss, "%d.%m.%Y").date()
+                # year =datetime.today().year 
+                # meldeschluss = start_meldung.split("/")[1].strip()+str(year)
+                # melde_date = datetime.strptime(meldeschluss, "%d.%m.%Y").date()
 
-                starttermin = start_meldung.split("/")[0].strip()+str(year)
-                start_date = datetime.strptime(starttermin, "%d.%m.%Y").date()
+                # starttermin = start_meldung.split("/")[0].strip()+str(year)
+                # start_date = datetime.strptime(starttermin, "%d.%m.%Y").date()
                 mannschaften = int(teams.split(" / ")[0].strip())
                 teams_hauptfeld = int(teams.split(" / ")[1].strip())
 
@@ -60,8 +60,8 @@ async def scrape():
                 turnier_data = dict(
                     name=name,
                     kategorie=cat.replace("BB | Kategorie", "").strip(),
-                    starttermin=start_date,
-                    meldeschluss=melde_date,
+                    #starttermin=start_date,
+                    #smeldeschluss=melde_date,
                     ort=ort,
                     gender=geschlecht,
                     anmeldung_url=detail_url,
@@ -73,6 +73,8 @@ async def scrape():
                 
                 stmt = insert(TournamentVVB).values(**turnier_data).returning(TournamentVVB.id)
                 await session.execute(stmt)
+                await scrape_registrations(browser, session, external_id, "summary")
+                await scrape_registrations(browser, session, external_id, "details")
                 await scrape_registrations(browser, session, external_id, "registrations")
                 await scrape_registrations(browser, session, external_id, "admissions")
                 await scrape_registrations(browser, session, external_id, "seeds")

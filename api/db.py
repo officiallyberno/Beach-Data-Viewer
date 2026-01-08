@@ -127,9 +127,9 @@ class TournamentVVB(Base):
     anzahl_teams_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
     anzahl_teams_qualifikation: Mapped[Optional[int]] = mapped_column(Integer)
     zulassungsreihenfolge: Mapped[Optional[str]] = mapped_column(Text)
-    preisgeld: Mapped[Optional[Float]] = mapped_column(Float)               # Geldbetrag in € o.ä.
-    startgeld: Mapped[Optional[Float]] = mapped_column(Float)
-    kaution: Mapped[Optional[Float]] = mapped_column(Float)
+    preisgeld: Mapped[Optional[str]] = mapped_column(Text)            
+    startgeld: Mapped[Optional[str]] = mapped_column(Text)
+    kaution: Mapped[Optional[str]] = mapped_column(Text)
 
     # Weitere Informationen
     oeffentliche_informationen: Mapped[Optional[str]] = mapped_column(Text)
@@ -137,12 +137,21 @@ class TournamentVVB(Base):
     turnierhierarchie: Mapped[Optional[str]] = mapped_column(String(100))
     turniermodus: Mapped[Optional[str]] = mapped_column(String(100))
     start_hauptfeld: Mapped[Optional[date]] = mapped_column(Date)
+    start_endspiele: Mapped[Optional[date]] = mapped_column(Date)
+    ort_technical_meeting: Mapped[Optional[str]] = mapped_column(String(100))
     termin_technical_meeting: Mapped[Optional[datetime]] = mapped_column(DateTime)
     anzahl_spielfelder_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
     verpflegungshinweise: Mapped[Optional[str]] = mapped_column(Text)
     links: Mapped[Optional[str]] = mapped_column(Text)
     anmerkungen: Mapped[Optional[str]] = mapped_column(Text)
+    einschreibetermin: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    wildcards_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
+    courts_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
+    sachpreise: Mapped[Optional[str]] = mapped_column(Text)
+    anmerkungen: Mapped[Optional[str]] = mapped_column(Text)
 
+
+    
     # Beziehungen zu abhängigen Tabellen
     teams: Mapped[list["TournamentTeam"]] = relationship(
         back_populates="tournament", cascade="all, delete-orphan"

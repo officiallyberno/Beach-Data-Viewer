@@ -4,7 +4,7 @@ import { Link, useLoaderData, useParams } from "@remix-run/react";
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { useState } from "react";
 import { ArrowBigLeft } from "lucide-react";
-import { formatDate } from "~/utils/date";
+import { formatDate, formatDateTime } from "~/utils/date";
 import TeamList from "~/components/teamList";
 import { Team, TournamentVVB } from "./types";
 
@@ -39,20 +39,51 @@ type LoaderData = {
 export default function TournamentDetail() {
   const { teams, tournament } = useLoaderData<LoaderData>();
   const [activeTab, setActiveTab] = useState("details");
-  const details = [
+
+  const dateMarks = [
+    { label: "Datum", value: formatDateTime(tournament.starttermin) },
+
+    { label: "Meldeschluss", value: formatDateTime(tournament.meldeschluss) },
+    {
+      label: "Zulassungstermin",
+      value: formatDate(tournament.zulassungstermin),
+    },
+    {
+      label: "Einschreiben",
+      value: formatDateTime(tournament.einschreibetermin),
+    },
+    {
+      label: "Technical Meeting",
+      value: formatDateTime(tournament.termin_technical_meeting),
+    },
+    {
+      label: "Start Hauptfeld",
+      value: formatDateTime(tournament.start_hauptfeld),
+    },
+    {
+      label: "Start Endspiele",
+      value: formatDateTime(tournament.start_entspiele),
+    },
+  ];
+
+  const importantInformation = [
     { label: "Kategorie", value: tournament.kategorie },
     { label: "Ort", value: tournament.ort },
-    { label: "Veranstalter", value: tournament.ausrichter },
     { label: "Geschlecht", value: tournament.gender },
-    { label: "Altersklasse", value: tournament.altersklasse },
-    {
-      label: "Anzahl Teams Hauptfeld",
-      value: tournament.anzahl_teams_hauptfeld,
-    },
     {
       label: "Gemeldete Mannschaften",
       value: tournament.gemeldete_mannschaften,
     },
+    {
+      label: "Anzahl Teams Hauptfeld",
+      value: tournament.anzahl_teams_hauptfeld,
+    },
+    { label: "Turniermodus", value: tournament.turniermodus },
+  ];
+  const details = [
+    { label: "Veranstalter", value: tournament.ausrichter },
+
+    { label: "Altersklasse", value: tournament.altersklasse },
     {
       label: "Anzahl Teams Qualifikation",
       value: tournament.anzahl_teams_qualifikation,
@@ -61,18 +92,7 @@ export default function TournamentDetail() {
       label: "Anzahl Spielfelder Hauptfeld",
       value: tournament.anzahl_spielfelder_hauptfeld,
     },
-    { label: "Turniermodus", value: tournament.turniermodus },
-    {
-      label: "Zulassungstermin",
-      value: formatDate(tournament.zulassungstermin),
-    },
-    { label: "Meldeschluss", value: formatDate(tournament.meldeschluss) },
-    { label: "Starttermin", value: formatDate(tournament.starttermin) },
-    { label: "Start Hauptfeld", value: formatDate(tournament.start_hauptfeld) },
-    {
-      label: "Technical Meeting",
-      value: formatDate(tournament.termin_technical_meeting),
-    },
+
     { label: "Startgeld", value: tournament.startgeld },
     { label: "Kaution", value: tournament.kaution },
     { label: "Preisgeld", value: tournament.preisgeld },
@@ -86,6 +106,7 @@ export default function TournamentDetail() {
     { label: "Anmerkungen", value: tournament.anmerkungen },
     { label: "Kontakt", value: tournament.kontakt },
     { label: "Links", value: tournament.links },
+    { label: "Sachpreise", value: tournament.sachpreise },
   ];
 
   return (
@@ -124,20 +145,64 @@ export default function TournamentDetail() {
               Turnierdetails
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 text-gray-200">
-              {details
-                .filter((d) => d.value && d.value !== "null" && d.value !== "")
-                .map((d) => (
-                  <div
-                    key={d.label}
-                    className="flex justify-between border-b border-gray-700/40 pb-1"
-                  >
-                    <span className="text-gray-400">{d.label}:</span>
-                    <span className="font-medium text-gray-100 text-right">
-                      {d.value}
-                    </span>
-                  </div>
-                ))}
+            <div className="grid grid-rows-3 gap-10">
+              <div className="row-span-1">
+                <div className="grid grid-cols-1 sm:grid-cols-1 gap-x-10 gap-y-4 text-gray-200">
+                  {dateMarks
+                    .filter(
+                      (d) => d.value && d.value !== "null" && d.value !== ""
+                    )
+                    .map((d) => (
+                      <div
+                        key={d.label}
+                        className="flex justify-between border-b border-gray-700/40 pb-1"
+                      >
+                        <span className="text-gray-400">{d.label}:</span>
+                        <span className="font-medium text-gray-100 text-right">
+                          {d.value}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+              <div className="col-span-1 row-span-1">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-x-10 gap-y-4 text-gray-200">
+                  {importantInformation
+                    .filter(
+                      (d) => d.value && d.value !== "null" && d.value !== ""
+                    )
+                    .map((d) => (
+                      <div
+                        key={d.label}
+                        className="flex justify-between border-b border-gray-700/40 pb-1"
+                      >
+                        <span className="text-gray-400">{d.label}:</span>
+                        <span className="font-medium text-gray-100 text-right">
+                          {d.value}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+              <div className="col-span-2 row-span-2">
+                <div className="grid grid-cols-1 md:grid-cols-1 gap-x-10 gap-y-4 text-gray-200">
+                  {details
+                    .filter(
+                      (d) => d.value && d.value !== "null" && d.value !== ""
+                    )
+                    .map((d) => (
+                      <div
+                        key={d.label}
+                        className="flex justify-between border-b border-gray-700/40 pb-1"
+                      >
+                        <span className="text-gray-400">{d.label}:</span>
+                        <span className="font-medium text-gray-100 text-right">
+                          {d.value}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              </div>
             </div>
 
             <div className="mt-6 flex justify-between items-center">

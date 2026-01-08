@@ -8,6 +8,7 @@ export type TournamentVVB = {
   gender?: string;
   anmeldung_url?: string;
   meldeschluss: string;
+  einschreibetermin: string;
   ausrichter?: string;
   altersklasse?: string;
 
@@ -24,11 +25,13 @@ export type TournamentVVB = {
   turnierhierarchie?: string;
   turniermodus?: string;
   start_hauptfeld: string;
+  start_entspiele: string;
   termin_technical_meeting: string;
   anzahl_spielfelder_hauptfeld: number;
   verpflegungshinweise?: string;
   links?: string;
   anmerkungen?: string;
+  sachpreise?: string;
 
   anmeldungen?: any[];
   zulassungen?: any[];
