@@ -86,7 +86,7 @@ export type RankingClean = {
   player_id: number;
   year: string;
   date: string;
-  rank: string;
+  rank: number;
   points: string;
   association: string;
   player: Player;

@@ -1,7 +1,5 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useLoaderData, useNavigate } from "@remix-run/react";
-import { div } from "framer-motion/m";
-import { Ranking } from "./rankings";
 import { RankingClean } from "./types";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -14,6 +12,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const res = await fetch(`http://localhost:8000/rank/${association}/${year}`);
   const players: RankingClean[] = await res.json();
+  const sortedPlayeres = players
+    .sort((a, b) => a.rank - b.rank)
+    .map((item, index) => ({
+      ...item,
+      id: index,
+    }));
 
   console.log("API response =", players);
 
@@ -69,7 +73,7 @@ export default function CleanRanking() {
             <tr
               key={r.id}
               className="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
-              onClick={() => navigate(`/players/${r.player_id}`)}
+              onClick={() => navigate(`/players/${r.player.external_id}`)}
             >
               <td className="p-2">{r.rank}</td>
               <td className="p-2">

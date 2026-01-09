@@ -25,6 +25,8 @@ async def scrape_player(player_id: int):
         stammdaten_table = tables[3]  # erste Tabelle = allgemeine Daten
         ranking_table    = tables[5]  # zweite Tabelle = Ranglistenplätze
         results_table    = tables[6]
+
+        external_id=0
         
         # --- Stammdaten ---
         stammdaten = {}
@@ -39,13 +41,13 @@ async def scrape_player(player_id: int):
         vorname = stammdaten.get("Vorname")
         verein = stammdaten.get("Verein", None)
         lizenz = stammdaten.get("Lizenznummer", None)
+        external_id=lizenz
 
 
         # Player upsert
         
         player = await session.scalar(
         select(Player).where(Player.external_id == player_id))        
-        
         if not player:
             player = Player(
                 external_id=player_id,
@@ -74,6 +76,7 @@ async def scrape_player(player_id: int):
 
             ranking = RankingClean(
                 player_id=player.id,
+                external_id=int(external_id),
                 year=jahr,
                 association=kategorie,
                 date=datum,
@@ -103,6 +106,7 @@ async def scrape_player(player_id: int):
             result = Result(
                 player_id=player.id,
                 turnier_id=turnier_id,
+                external_id=int(external_id),
                 date=datum,
                 partner=partner,
                 tournament_name=turnier,
@@ -112,6 +116,7 @@ async def scrape_player(player_id: int):
                 association=kategorie,
             )
             session.add(result)
+            
 
         await session.commit()
 

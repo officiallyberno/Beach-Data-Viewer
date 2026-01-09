@@ -54,7 +54,7 @@ class Ranking(Base):
     verein     : Mapped[str]  = mapped_column(String(120))
     punkte     : Mapped[str]  = mapped_column(String(120))
     geschlecht : Mapped[str]  = mapped_column(String(10))
-    saison     : Mapped[int]  = mapped_column(Integer, default=2025)   # optional
+    saison     : Mapped[int]  = mapped_column(Integer, default=2026)   # optional
 
 class Player(Base):
     __tablename__ = "players"
@@ -74,10 +74,11 @@ class RankingClean(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     player_id: Mapped[int] = mapped_column(ForeignKey("players.id"), nullable=False)
+    external_id: Mapped[int] = mapped_column(Integer)
     year: Mapped[str]
     association: Mapped[str] = mapped_column(String(50))
     date: Mapped[str]= mapped_column((Date))
-    rank: Mapped[str] = mapped_column(String(50))
+    rank: Mapped[str] = mapped_column(String(120))
     points: Mapped[str]=mapped_column(String(50))
 
     player: Mapped[Player] = relationship(back_populates="rankings")
@@ -89,6 +90,8 @@ class Result(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     player_id: Mapped[int] = mapped_column(ForeignKey("players.id"), nullable=False)
+    external_id: Mapped[int] = mapped_column(Integer)
+
     turnier_id:Mapped[str] = mapped_column(String(100))
     date: Mapped[str]= mapped_column((Date))
     partner: Mapped[str] = mapped_column(String(100))

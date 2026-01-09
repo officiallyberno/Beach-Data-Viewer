@@ -170,9 +170,10 @@ export default function TurPage() {
           )}
         </button>
 
+        {/* Vergangene Turniere */}
         {showPast && (
           <>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {pastTournaments.map((t) => (
                 <li
                   key={t.id}
@@ -228,9 +229,11 @@ export default function TurPage() {
             </div>
           )}
         </button>
+
+        {/* Aktuelle Turniere */}
         {showFuture && (
           <>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {futureTournaments.map((t) => (
                 <li
                   key={t.id}

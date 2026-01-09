@@ -8,7 +8,7 @@ from datetime import datetime
 
 
 
-URL = "https://beach.volleyball-verband.de/public/tur.php?kat=2&saison=25"
+URL = "https://beach.volleyball-verband.de/public/tur.php?kat=2&saison=26"
 
 def parse_date_range(raw_datum: str):
     raw_datum = raw_datum.strip()
@@ -77,7 +77,7 @@ def parse_date_range(raw_datum: str):
         print(f"⚠ Fehler beim Parsen von '{raw_datum}': {e}")
         return None, None
 
-async def scrape():
+async def scrape_tur_lv():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
@@ -119,4 +119,4 @@ async def scrape():
 
 
 if __name__ == "__main__":
-     asyncio.run(scrape())
+     asyncio.run(scrape_tur_lv())

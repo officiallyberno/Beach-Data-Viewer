@@ -90,9 +90,17 @@ async def get_tournament(
     return tournament
 
 
-@app.get("/players/{player_id}")
-async def get_player(player_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Player).where(Player.id == player_id))
+# @app.get("/players/{player_id}")
+# async def get_player(player_id: int, db: AsyncSession = Depends(get_db)):
+#     result = await db.execute(select(Player).where(Player.id == player_id))
+#     player = result.scalar_one_or_none()
+#     if not player:
+#         raise HTTPException(status_code=404, detail="Player not found")
+#     return player
+
+@app.get("/players/{external_id}")
+async def get_player(external_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Player).where(Player.external_id == external_id))
     player = result.scalar_one_or_none()
     if not player:
         raise HTTPException(status_code=404, detail="Player not found")
@@ -101,13 +109,13 @@ async def get_player(player_id: int, db: AsyncSession = Depends(get_db)):
 
 @app.get("/players/{player_id}/rankings")
 async def get_player_rankings(player_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(RankingClean).where(RankingClean.player_id == player_id))
+    result = await db.execute(select(RankingClean).where(RankingClean.external_id == player_id))
     return result.scalars().all()
 
 
 @app.get("/players/{player_id}/results")
 async def get_player_results(player_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Result).where(Result.player_id == player_id))
+    result = await db.execute(select(Result).where(Result.external_id== player_id))
     return result.scalars().all()
 
 

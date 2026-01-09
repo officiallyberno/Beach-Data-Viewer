@@ -14,7 +14,7 @@ URL = "https://www.beachvolleybb.de/cms/home/beachtour/erwachsene/turniere.xhtml
 
 
 
-async def scrape():
+async def scrape_tur_vvb():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
@@ -43,14 +43,6 @@ async def scrape():
                 if name_tag and name_tag.get("href"):
                     detail_url = "https://www.beachvolleybb.de" + name_tag["href"]
 
-                # year =datetime.today().year 
-                # meldeschluss = start_meldung.split("/")[1].strip()+str(year)
-                # melde_date = datetime.strptime(meldeschluss, "%d.%m.%Y").date()
-
-                # starttermin = start_meldung.split("/")[0].strip()+str(year)
-                # start_date = datetime.strptime(starttermin, "%d.%m.%Y").date()
-                mannschaften = int(teams.split(" / ")[0].strip())
-                teams_hauptfeld = int(teams.split(" / ")[1].strip())
 
                 match = re.search(r"tourneyId=(\d+)", detail_url)
                 external_id = match.group(1) if match else None
@@ -60,13 +52,8 @@ async def scrape():
                 turnier_data = dict(
                     name=name,
                     kategorie=cat.replace("BB | Kategorie", "").strip(),
-                    #starttermin=start_date,
-                    #smeldeschluss=melde_date,
-                    ort=ort,
                     gender=geschlecht,
                     anmeldung_url=detail_url,
-                    gemeldete_mannschaften= mannschaften,
-                    anzahl_teams_hauptfeld=teams_hauptfeld,
                     external_id=str (external_id)
                 )
 

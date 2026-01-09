@@ -4,51 +4,10 @@ from datetime import date, datetime
 import re
 import string
 from bs4 import BeautifulSoup
-
-
-
-
+from scraper.dateUtils import normalize_date_field, normalize_datetime_field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.db import TournamentTeam, TournamentVVB
-
-def parse_date(text: str) -> date | None:
-    
-    """Hilfsfunktion: dd.mm.yyyy -> date"""
-    try:
-        return datetime.strptime(text.strip(), "%d.%m.%Y").date()
-    except Exception:
-        return None
-
-
-def parse_date_range(raw_datum: str):
-    raw_datum = raw_datum.strip()
-    try:
-        if "-" in raw_datum:
-            start_part, end_part = raw_datum.split("-")
-            start_part = start_part.strip().rstrip(".")
-            end_part = end_part.strip()
-
-            if len(end_part) == 10:  # dd.mm.yyyy
-                year = end_part[-4:]
-            elif len(end_part) == 5:  # dd.mm
-                year = str(datetime.today().year)
-                end_part += f".{year}"
-            else:
-                year = str(datetime.today().year)
-
-            if len(start_part) == 5:
-                start_part += f".{year}"
-
-            start_date = datetime.strptime(start_part, "%d.%m.%Y").date()
-            end_date = datetime.strptime(end_part, "%d.%m.%Y").date()
-        else:
-            start_date = datetime.strptime(raw_datum, "%d.%m.%Y").date()
-            end_date = start_date
-        return start_date, end_date
-    except Exception as e:
-        print(f"⚠ Fehler beim Parsen von '{raw_datum}': {e}")
-        return None, None
 
 
 async def insert_teams(db: AsyncSession, tournament_id: int, registrations: list[dict]):
@@ -81,12 +40,9 @@ async def insert_teams(db: AsyncSession, tournament_id: int, registrations: list
     await db.commit()
 
 
-
-
-
 async def scrape_registrations(browser, db: AsyncSession, external_tournament_id: int, kind: string):
     """
-    Scrapt die Registrations eines Turniers und speichert sie direkt in die DB.
+    Scrapt die Registrations eines Turniers und speichert sie direkt in die API.
     """
     url = (
         f"https://www.beachvolleybb.de/cms/home/beachtour/erwachsene/turniere.xhtml"
@@ -106,7 +62,7 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
     if len(tables)<2:
         return  # keine Tabelle gefunden → nichts einfügen
     
-    # if(kind == "registrations"):
+    if(kind == "registrations"):
   
         for tr in table.select("tbody tr"):
             tds = tr.select("td")
@@ -219,115 +175,110 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
               **scraped_data
           )
           db.add(tournament)
-
+          await db.commit()
       
+    elif(kind=="admissions"):
+       for tr in table.select("tbody tr"):
+            tds = tr.select("td")
+            
+            if not tds:
+                continue
+            if len(tds) > 1 and tds[0].get_text(strip=True)!='':
+              zulassung_reihenfolge=str(tds[0].get_text(strip=True))
+            else:
+              zulassung_reihenfolge =-1
+            
+            if len (tds) >1:
+              name = tds[1].get_text(strip=True)
+            else:
+              name = "Nicht bekannt"
+            
+            if len(tds) > 3:
+              status = tds[3].get_text(strip=True)
+            else:
+              status = "Angemeldet"
+            if len(tds) > 4:
+              doppelmeldung = tds[4].get_text(strip=True)
+            else:
+              doppelmeldung = "Nein"
+            if len(tds) > 5:
+              punkte = tds[5].get_text(strip=True)
+            else:
+              punkte = "Keine Informationen"
+            result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
+            tournament_id = result.scalar_one_or_none()
+            
+            await upsert_team(
+                    db,
+                    tournament_id=int(tournament_id),
+                    name=name,
+                    zulassung_reihenfolge=int(zulassung_reihenfolge),
+                    status=status,
+                    doppelmeldung=doppelmeldung,
+                    punkte_zulassung=punkte,
+                )
     
-    await db.commit()
-      
+    elif(kind=="seeds"):
+       for tr in table.select("tbody tr"):
+            tds = tr.select("td")
+            
+            if not tds:
+                continue
+            if len(tds) > 1 and tds[0].get_text(strip=True)!='':
+              setzung_reihenfolge=str(tds[0].get_text(strip=True))
+            else:
+              setzung_reihenfolge =-1
+            
+            if len (tds) >1:
+              name = tds[1].get_text(strip=True)
+            else:
+              name = "Nicht bekannt"
+            if len(tds) > 5:
+              punkte = tds[5].get_text(strip=True)
+            else:
+              punkte = "Keine Informationen"
 
+            result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
+            tournament_id = result.scalar_one_or_none()
 
-    # elif(kind=="admissions"):
-    #    for tr in table.select("tbody tr"):
-    #         tds = tr.select("td")
-            
-    #         if not tds:
-    #             continue
-    #         if len(tds) > 1 and tds[0].get_text(strip=True)!='':
-    #           zulassung_reihenfolge=str(tds[0].get_text(strip=True))
-    #         else:
-    #           zulassung_reihenfolge =-1
-            
-    #         if len (tds) >1:
-    #           name = tds[1].get_text(strip=True)
-    #         else:
-    #           name = "Nicht bekannt"
-            
-    #         if len(tds) > 3:
-    #           status = tds[3].get_text(strip=True)
-    #         else:
-    #           status = "Angemeldet"
-    #         if len(tds) > 4:
-    #           doppelmeldung = tds[4].get_text(strip=True)
-    #         else:
-    #           doppelmeldung = "Nein"
-    #         if len(tds) > 5:
-    #           punkte = tds[5].get_text(strip=True)
-    #         else:
-    #           punkte = "Keine Informationen"
-    #         result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
-    #         tournament_id = result.scalar_one_or_none()
-            
-    #         await upsert_team(
-    #                 db,
-    #                 tournament_id=int(tournament_id),
-    #                 name=name,
-    #                 zulassung_reihenfolge=int(zulassung_reihenfolge),
-    #                 status=status,
-    #                 doppelmeldung=doppelmeldung,
-    #                 punkte_zulassung=punkte,
-    #             )
+            await upsert_team(
+                    db,
+                    tournament_id,
+                    name=name,
+                    setzung_reihenfolge= int(setzung_reihenfolge),
+                    punkte_setzung=punkte,
+                )
     
-    # elif(kind=="seeds"):
-    #    for tr in table.select("tbody tr"):
-    #         tds = tr.select("td")
+    elif(kind=="rankings"):
+       for tr in table.find("tbody").find_all("tr", recursive=False):
+            tds = tr.find_all("td", recursive=False)
             
-    #         if not tds:
-    #             continue
-    #         if len(tds) > 1 and tds[0].get_text(strip=True)!='':
-    #           setzung_reihenfolge=str(tds[0].get_text(strip=True))
-    #         else:
-    #           setzung_reihenfolge =-1
+            if not tds:
+                continue
+            if len(tds) > 1 and tds[0].get_text(strip=True)!='':
+              platzierung=str(tds[0].get_text(strip=True))
+            else:
+              platzierung =-1
             
-    #         if len (tds) >1:
-    #           name = tds[1].get_text(strip=True)
-    #         else:
-    #           name = "Nicht bekannt"
-    #         if len(tds) > 5:
-    #           punkte = tds[5].get_text(strip=True)
-    #         else:
-    #           punkte = "Keine Informationen"
+            if len (tds) >1:
+              name = tds[1].get_text(strip=True)
+            else:
+              name = "Nicht bekannt"
+            if len(tds) > 4:
+              punkte = tds[4].get_text(strip=True)
+            else:
+              punkte = "Keine Informationen"
 
-    #         result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
-    #         tournament_id = result.scalar_one_or_none()
+            result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
+            tournament_id = result.scalar_one_or_none()
 
-    #         await upsert_team(
-    #                 db,
-    #                 tournament_id,
-    #                 name=name,
-    #                 setzung_reihenfolge= int(setzung_reihenfolge),
-    #                 punkte_setzung=punkte,
-    #             )
-    
-    # elif(kind=="rankings"):
-    #    for tr in table.find("tbody").find_all("tr", recursive=False):
-    #         tds = tr.find_all("td", recursive=False)
-            
-    #         if not tds:
-    #             continue
-    #         if len(tds) > 1 and tds[0].get_text(strip=True)!='':
-    #           platzierung=str(tds[0].get_text(strip=True))
-    #         else:
-    #           platzierung =-1
-            
-    #         if len (tds) >1:
-    #           name = tds[1].get_text(strip=True)
-    #         else:
-    #           name = "Nicht bekannt"
-    #         if len(tds) > 4:
-    #           punkte = tds[4].get_text(strip=True)
-    #         else:
-    #           punkte = "Keine Informationen"
-
-    #         result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
-    #         tournament_id = result.scalar_one_or_none()
-
-    #         await upsert_team(
-    #                 db,
-    #                 tournament_id,
-    #                 name=name,
-    #                 platzierung= int(platzierung),
-    #                 punkte_pro_spieler=punkte,
-    #             )
+            await upsert_team(
+                    db,
+                    tournament_id,
+                    name=name,
+                    platzierung= int(platzierung),
+                    punkte_pro_spieler=punkte,
+                )
            
 
 
@@ -355,9 +306,9 @@ async def upsert_team(db, tournament_id, name, **kwargs):
 
 
 ATTRIBUTE_MAP = {
+   
     # Basis
     "turnier": "name",
-    "turnierkategorie": "kategorie",
     "turnierhierarchie": "turnierhierarchie",
     "ort": "ort",
     "datum": "starttermin",
@@ -395,7 +346,6 @@ ATTRIBUTE_MAP = {
 
 scraped_data = {
     "name": None,
-    "kategorie": None,
     "turnierhierarchie": None,
     "ort": None,
     "starttermin": None,
@@ -428,42 +378,3 @@ scraped_data = {
     "anmerkungen":None,
     "turniermodus":None,
 }
-
-
-
-
-DATETIME_FORMATS = [
-    "%d.%m.%Y, %H:%M",  # 28.03.2026, 17:45
-    "%d.%m.%Y %H:%M",   # 20.10.2025 12:00
-]
-
-def normalize_datetime_field(value, field_name=None):
-    if isinstance(value, datetime):
-        return value
-
-    if isinstance(value, str):
-        for fmt in DATETIME_FORMATS:
-            try:
-                return datetime.strptime(value, fmt)
-            except ValueError:
-                continue
-
-        if field_name:
-            print(f"Ungültiges Datetime im Feld {field_name}: {value}")
-        return None
-
-    return None
-    
-    
-def normalize_date_field(value, field_name=None, fmt="%d.%m.%Y"):
-    if isinstance(value, str):
-        try:
-            return datetime.strptime(value, fmt).date()
-        except ValueError:
-            if field_name:
-                print(f"Ungültiges Datum im Feld {field_name}: {value}")
-            return None
-    elif isinstance(value, date):
-        return value
-    else:
-        return None

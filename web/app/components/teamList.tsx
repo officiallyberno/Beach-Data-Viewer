@@ -1,3 +1,4 @@
+import { Team } from "~/routes/types";
 import { formatDate } from "~/utils/date";
 import { formatDvvPoints } from "~/utils/formatDvvPoints";
 

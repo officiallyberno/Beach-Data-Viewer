@@ -44,8 +44,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <div>
-      <Outlet />
       <Navigation />
+      <div className="pt-16">
+        <Outlet />
+      </div>
     </div>
   );
 }
