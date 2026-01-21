@@ -9,7 +9,7 @@ export type TournamentVVB = {
   anmeldung_url?: string;
   meldeschluss: string;
   einschreibetermin: string;
-  ausrichter?: string;
+  ausrichter: string;
   altersklasse?: string;
 
   gemeldete_mannschaften?: number;

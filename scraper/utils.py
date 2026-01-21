@@ -207,6 +207,9 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
               punkte = "Keine Informationen"
             result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
             tournament_id = result.scalar_one_or_none()
+
+            dvv_lv_zulassung = parse_zulassungspunkte(punkte)
+
             
             await upsert_team(
                     db,
@@ -216,6 +219,8 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
                     status=status,
                     doppelmeldung=doppelmeldung,
                     punkte_zulassung=punkte,
+                    dvv_punkte_zulassung= dvv_lv_zulassung[0],
+                    lv_punkte_zulassung= dvv_lv_zulassung[1]
                 )
     
     elif(kind=="seeds"):
@@ -305,6 +310,9 @@ async def upsert_team(db, tournament_id, name, **kwargs):
     return team
 
 
+
+
+
 ATTRIBUTE_MAP = {
    
     # Basis
@@ -378,3 +386,17 @@ scraped_data = {
     "anmerkungen":None,
     "turniermodus":None,
 }
+
+def parse_zulassungspunkte(text: str) -> tuple[int, int]:
+    lv_match = re.search(r"LV.*?:\s*(\d+)", text)
+    dvv_match = re.search(r"DVV.*?:\s*(\d+)", text)
+
+    if not lv_match or not dvv_match:
+        lv_punkte_zulassung =-1
+        dvv_punkte_zulassung = -1
+        return dvv_punkte_zulassung, lv_punkte_zulassung
+
+    lv_punkte_zulassung = int(lv_match.group(1))
+    dvv_punkte_zulassung = int(dvv_match.group(1))
+
+    return dvv_punkte_zulassung, lv_punkte_zulassung

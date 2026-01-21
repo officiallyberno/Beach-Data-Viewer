@@ -47,9 +47,9 @@ export default function TournamentGrid({
               </span>
               <span
                 className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  t.gender === "m"
+                  t.gender === "männlich"
                     ? "bg-blue-500/20 text-blue-300"
-                    : t.gender === "w"
+                    : t.gender === "weiblich"
                     ? "bg-pink-500/20 text-pink-300"
                     : "bg-gray-600/40 text-gray-300"
                 }`}

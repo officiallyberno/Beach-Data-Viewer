@@ -7,6 +7,7 @@ import { ArrowBigLeft } from "lucide-react";
 import { formatDate, formatDateTime } from "~/utils/date";
 import TeamList from "~/components/teamList";
 import { Team, TournamentVVB } from "./types";
+import { div } from "framer-motion/client";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const id = params.id;
@@ -108,6 +109,13 @@ export default function TournamentDetail() {
     { label: "Links", value: tournament.links },
     { label: "Sachpreise", value: tournament.sachpreise },
   ];
+
+  const now = new Date();
+  const zulassungstermin = new Date(tournament.zulassungstermin);
+  const setzungstermin = new Date(tournament.termin_technical_meeting);
+
+  const isZulassungFinal = now >= zulassungstermin;
+  const isSetzungFinal = now >= zulassungstermin;
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -231,7 +239,11 @@ export default function TournamentDetail() {
         {activeTab === "zulassung" && (
           <TeamList
             teams={teams}
-            title="Zulassung"
+            title={
+              isZulassungFinal
+                ? "Zulassung"
+                : `Zulassung: ${formatDate(tournament.zulassungstermin)}`
+            }
             activeTab={activeTab}
             displayKey="punkte_zulassung"
           />
@@ -240,7 +252,13 @@ export default function TournamentDetail() {
         {activeTab === "setzliste" && (
           <TeamList
             teams={teams}
-            title="Setzliste"
+            title={
+              isSetzungFinal
+                ? "Setzung"
+                : `Setzung: ${formatDateTime(
+                    tournament.termin_technical_meeting
+                  )}`
+            }
             activeTab={activeTab}
             displayKey="punkte_setzung"
           />
@@ -253,13 +271,22 @@ export default function TournamentDetail() {
           </section>
         )}
 
-        {activeTab === "platzierungen" && (
+        {activeTab === "platzierungen" && teams[0] === null && (
           <TeamList
             teams={teams}
             title="Platzierungen"
             activeTab={activeTab}
             displayKey="punkte_pro_spieler"
           />
+        )}
+        {activeTab === "platzierungen" && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-100 mb-4">
+              Plazierungen
+            </h2>
+
+            <div>Es sind noch keine Platzierungen vorhanden!</div>
+          </div>
         )}
       </div>
     </div>

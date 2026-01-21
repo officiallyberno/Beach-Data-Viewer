@@ -2,7 +2,6 @@ import { LoaderFunctionArgs } from "@remix-run/node";
 import { Form, Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
-import SingleGenderToggle from "~/components/toggleGender";
 import TournamentGrid from "~/components/turgrid";
 import TurNavigation from "~/components/turnavigation";
 import { formatDate } from "~/utils/date";
@@ -10,15 +9,23 @@ import { TournamentVVB } from "./types";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const genders = url.searchParams.getAll("gender");
 
   const q = url.searchParams.get("q")?.toLowerCase() ?? "";
   const query = url.searchParams.toString();
 
-  const res = await fetch(`http://localhost:8000/vvb`);
+  const res = await fetch(`http://localhost:8000/vvb?${query}`);
   const data: TournamentVVB[] = await res.json();
 
   let tournaments = data;
+
+  if (q) {
+    tournaments = tournaments.filter(
+      (t) =>
+        t.ort.toLowerCase().includes(q) ||
+        t.ausrichter.toLowerCase().includes(q) ||
+        t.starttermin.includes(q)
+    );
+  }
 
   return { tournaments };
 }
@@ -37,20 +44,12 @@ export default function TurPageVVB() {
   const [showPast, setShowPast] = useState(false);
   const [showFuture, setShowFuture] = useState(true);
 
-  const [selectedGender, setSelectedGender] = useState<"F" | "M" | "">(
-    params.get("gender") === "F" || params.get("gender") === "M"
-      ? (params.get("gender") as "F" | "M")
-      : ""
-  );
   return (
     <div>
       <TurNavigation />
       <div className="w-full mx-auto mb-16 p-6">
         <Form method="get" className="flex flex-wrap gap-4 mb-6">
-          <div className="grid content-end">
-            <div className="text-slate-950">.</div>
-            <h1 className="text-2xl font-bold mb-2">Filter:</h1>
-          </div>
+          {/* Suche */}
           <div className="flex flex-col items-center gap-1">
             <span className="text-gray-700 font-medium text-center justify-center">
               Suche
@@ -82,26 +81,25 @@ export default function TurPageVVB() {
               <option value="ohne DVV-Punkte">ohne DVV‑Punkte</option>
             </select>
           </div>
-          {/* Verband */}
-          <div className="flex flex-col items-center gap-1"></div>
 
+          {/* Geschlecht */}
           <div className="flex flex-col items-center gap-1">
             <span className="text-gray-700 font-medium text-center justify-center">
               Geschlecht
             </span>
-            <SingleGenderToggle
-              value={selectedGender}
-              onChange={setSelectedGender}
-            />
+            <select
+              className="rounded-lg bg-white p-2 text-gray-700"
+              name="gender"
+              id="eins"
+            >
+              <option value="">Alle</option>
+              <option value="männlich">männlich</option>
+              <option value="weiblich">weiblich</option>
+            </select>
           </div>
-
-          {/* Hidden input, nur wenn ein Geschlecht ausgewählt ist */}
-          {selectedGender && (
-            <input type="hidden" name="gender" value={selectedGender} />
-          )}
           <div className="flex flex-col items-end">
             <div></div>
-            <button className="border px-4 py-2 rounded bg-blue-600 mt-auto text-white">
+            <button className="border px-4 py-2 rounded-lg bg-blue-600 mt-auto text-white">
               Filtern
             </button>
           </div>

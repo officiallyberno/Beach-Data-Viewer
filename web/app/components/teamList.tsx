@@ -20,6 +20,11 @@ export default function TeamList({
   const sortTeams = (tab: string) => {
     const sorted = [...teams];
 
+    const statusOrder: Record<string, number> = {
+      Hauptfeld: 0,
+      Nachrücker: 1,
+      Absage: 2,
+    };
     switch (tab) {
       case "meldeliste":
         return sorted.sort(
@@ -29,14 +34,19 @@ export default function TeamList({
         );
 
       case "zulassung":
-        return sorted.sort(
-          (a, b) => a.zulassung_reihenfolge - b.zulassung_reihenfolge
-        );
-
+        return sorted.sort((a: Team, b: Team) => {
+          return (
+            statusOrder[a.status] - statusOrder[b.status] &&
+            a.zulassung_reihenfolge - b.zulassung_reihenfolge
+          );
+        });
       case "setzliste":
-        return sorted.sort(
-          (a, b) => a.setzung_reihenfolge - b.setzung_reihenfolge
-        );
+        return sorted.sort((a: Team, b: Team) => {
+          return (
+            statusOrder[a.status] - statusOrder[b.status] &&
+            a.setzung_reihenfolge - b.setzung_reihenfolge
+          );
+        });
 
       case "platzierungen":
         return sorted.sort((a, b) => a.platzierung - b.platzierung);
@@ -76,12 +86,19 @@ export default function TeamList({
               {displayKey === "anmeldedatum" && (
                 <span>{formatDate(team.anmeldedatum)}</span>
               )}
-              {displayKey === "punkte_zulassung" && (
-                <span>{formatDvvPoints(team.punkte_zulassung)}</span>
-              )}
-              {displayKey === "punkte_setzung" && (
-                <span>{formatDvvPoints(team.punkte_setzung)}</span>
-              )}
+              {displayKey === "punkte_zulassung" &&
+                team.punkte_zulassung !== null && (
+                  <span>{formatDvvPoints(team.punkte_zulassung)}</span>
+                )}
+              {displayKey === "punkte_zulassung" &&
+                team.punkte_zulassung === null && <span>{team.status}</span>}
+
+              {displayKey === "punkte_setzung" &&
+                team.punkte_setzung !== null && (
+                  <span>{formatDvvPoints(team.punkte_setzung)}</span>
+                )}
+              {displayKey === "punkte_setzung" &&
+                team.punkte_setzung === null && <span>{team.status}</span>}
               {displayKey === "platzierung" && (
                 <span>{team.platzierung ?? "-"}</span>
               )}

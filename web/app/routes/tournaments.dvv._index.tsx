@@ -5,7 +5,6 @@ import { div } from "framer-motion/client";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import SingleGenderToggle from "~/components/toggleGender";
-import TournamentGrid from "~/components/turgrid";
 import TurNavigation from "~/components/turnavigation";
 import { formatDate } from "~/utils/date";
 
@@ -21,7 +20,6 @@ type Tournament = {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const genders = url.searchParams.getAll("gender"); // Array! ["F","M"]
 
   const q = url.searchParams.get("q")?.toLowerCase() ?? "";
   const query = url.searchParams.toString();
@@ -61,11 +59,6 @@ export default function TurPage() {
   const [showPast, setShowPast] = useState(false);
   const [showFuture, setShowFuture] = useState(true);
 
-  const [selectedGender, setSelectedGender] = useState<"F" | "M" | "">(
-    params.get("gender") === "F" || params.get("gender") === "M"
-      ? (params.get("gender") as "F" | "M")
-      : ""
-  );
   return (
     <div>
       <TurNavigation />
@@ -136,16 +129,13 @@ export default function TurPage() {
             <span className="text-gray-700 font-medium text-center justify-center">
               Geschlecht
             </span>
-            <SingleGenderToggle
-              value={selectedGender}
-              onChange={setSelectedGender}
-            />
+            <select name="gender" id="eins">
+              <option value="">Alle</option>
+              <option value="männlich">männlich</option>
+              <option value="weiblich">weiblich</option>
+            </select>
           </div>
 
-          {/* Hidden input, nur wenn ein Geschlecht ausgewählt ist */}
-          {selectedGender && (
-            <input type="hidden" name="gender" value={selectedGender} />
-          )}
           <div className="flex flex-col items-end">
             <div></div>
             <button className="border px-4 py-2 rounded bg-blue-600 mt-auto text-white">
@@ -155,7 +145,7 @@ export default function TurPage() {
         </Form>
         <button
           onClick={() => setShowPast(!showPast)}
-          className="mt-4 px-4 py-2 rounded"
+          className="mt-4 px-4 py-2 rounded-lg"
         >
           {showPast ? (
             <div className="flex flex-row bg-gray-800 rounded-lg p-2">

@@ -6,7 +6,7 @@ from sqlalchemy import select
 from api.db import SessionLocal, Player, RankingClean, Result
 
 
-async def scrape_player(player_id: int):
+async def scrape_player(player_id: int, gender: str):
     url = f"https://beach.volleyball-verband.de/public/spieler.php?id={player_id}"
 
     # Seite laden
@@ -55,6 +55,7 @@ async def scrape_player(player_id: int):
                 first_name=vorname,
                 club=verein,
                 license_number=lizenz,
+                gender=gender,
             )
             session.add(player)
             await session.flush()  # id holen

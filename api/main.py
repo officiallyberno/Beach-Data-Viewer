@@ -90,13 +90,7 @@ async def get_tournament(
     return tournament
 
 
-# @app.get("/players/{player_id}")
-# async def get_player(player_id: int, db: AsyncSession = Depends(get_db)):
-#     result = await db.execute(select(Player).where(Player.id == player_id))
-#     player = result.scalar_one_or_none()
-#     if not player:
-#         raise HTTPException(status_code=404, detail="Player not found")
-#     return player
+
 
 @app.get("/players/{external_id}")
 async def get_player(external_id: int, db: AsyncSession = Depends(get_db)):
@@ -121,8 +115,33 @@ async def get_player_results(player_id: int, db: AsyncSession = Depends(get_db))
 
 
 @app.get("/vvb")
-async def get_all_tournaments(db: AsyncSession = Depends(get_db)):
+async def get_all_tournaments(    
+    kategorie : Annotated[Optional[str], Query(alias="cat")] = None,
+    verband   : Annotated[Optional[str], Query(alias="org")] = None,
+    geschlecht: Annotated[Optional[str], Query(alias="gender")] = None,
+    future    : Annotated[bool,           Query(alias="onlyFuture")] = False,
+    db: AsyncSession = Depends(get_db)):
     stmt = select(TournamentVVB)
+
+    conds = []
+    if kategorie:
+        cond = TournamentVVB.kategorie.ilike(f"%{kategorie}%")
+        print("→ Bedingung Kategorie:", cond)
+        conds.append(cond)
+    if verband:
+        conds.append(TournamentVVB.ausrichter.ilike(f"%{verband}%"))
+    if geschlecht:
+        conds.append(TournamentVVB.gender.ilike(f"%{geschlecht}%"))
+    if future:
+        conds.append(
+            TournamentVVB.starttermin.op("~")(r"-\s*(\d{2}\.\d{2}\.\d{4})$")
+            & (TournamentVVB.starttermin.like(f"%{date.today().year}%"))
+        )
+       
+    if conds:
+        stmt = stmt.where(and_(*conds))
+
+
     result = await db.execute(stmt)
     tournaments = result.scalars().all()
 
@@ -177,16 +196,37 @@ async def get_tournament_teams(tournament_id: int, db: AsyncSession = Depends(ge
     # convert to simple dicts
     return teams
 
+
 @app.get("/rank/{association}/{year}")
-async def get_ranking(association: str, year:str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(
-    select(RankingClean)
-    .options(selectinload(RankingClean.player))       # 👈 Spieler mitladen!
-    .join(Player)
-    .filter(RankingClean.association == association)
-    .filter(RankingClean.year == year)
-    .order_by(RankingClean.rank.asc())
-)
+async def get_ranking(
+    association: str,
+    year: str,
+    gender: Annotated[Optional[str], Query()] = None,
+    q: Annotated[Optional[str], Query()] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    stmt = (
+        select(RankingClean)
+        .join(Player)
+        .options(selectinload(RankingClean.player))
+        .where(RankingClean.association == association)
+        .where(RankingClean.year == year)
+    )
+
+    if q:
+        stmt = stmt.where(
+            or_(
+                Player.first_name.ilike(f"%{q}%"),
+                Player.club.ilike(f"%{q}%"),
+            )
+        )
+
+    if gender:
+        stmt = stmt.where(Player.gender == gender)
+
+    stmt = stmt.order_by(RankingClean.rank.asc())
+
+    result = await db.execute(stmt)
     players = result.scalars().all()
 
     return players

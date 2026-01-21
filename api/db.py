@@ -63,6 +63,7 @@ class Player(Base):
     external_id: Mapped[int] = mapped_column(Integer, unique=True, nullable=False)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
+    gender: Mapped[str] = mapped_column(String(50))
     club: Mapped[str] = mapped_column(String(100), nullable=True)
     license_number: Mapped[str] = mapped_column(String(20), nullable=True)
 
@@ -186,6 +187,9 @@ class TournamentTeam(Base):
     #Zulassung
     zulassung_reihenfolge: Mapped[Optional[int]]= mapped_column(Integer)
     punkte_zulassung: Mapped[Optional[str]] = mapped_column(String(100))
+    dvv_punkte_zulassung: Mapped[Optional[int]]= mapped_column(Integer)
+    lv_punkte_zulassung: Mapped[Optional[int]]= mapped_column(Integer)
+
     #Setzung
     setzung_reihenfolge: Mapped[Optional[int]]= mapped_column(Integer)
     punkte_setzung: Mapped[Optional[str]] = mapped_column(String(100))

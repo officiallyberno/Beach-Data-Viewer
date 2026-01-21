@@ -14,11 +14,12 @@ async def main():
 
     sem = asyncio.Semaphore(CONCURRENCY)
 
-    async def sem_task(pid: int):
+    async def sem_task(pid: int, gender:str):
         async with sem:               # Limit der gleichzeitigen Jobs
-            await scrape_player(pid)
+            await scrape_player(pid, gender )
 
-    tasks = [sem_task(p["id"]) for p in players]
+    tasks = [sem_task(p["id"],p["gender"]) 
+             for p in players]
     await asyncio.gather(*tasks)      # ALLE parallel starten
 
 if __name__ == "__main__":

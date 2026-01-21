@@ -14,6 +14,7 @@ URL = "https://www.beachvolleybb.de/cms/home/beachtour/erwachsene/turniere.xhtml
 
 
 
+
 async def scrape_tur_vvb():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -36,7 +37,8 @@ async def scrape_tur_vvb():
                 tds = r.select("td")
                 if not tds or len(tds) < 5:
                     continue
-                cat, name, start_meldung, ort, geschlecht, teams, anmeldung= [c.get_text(strip=True) for c in tds[:7]]
+                cat, name, start_meldung, ort, geschlecht, teams, anmeldung= [c.get_text(strip=True) for c in tds[:7]] 
+
                 # Detail-Link extrahieren
                 detail_url = None
                 name_tag = tds[1].select_one("a") 
@@ -76,4 +78,8 @@ async def scrape_tur_vvb():
 
 
 if __name__ == "__main__":
-    asyncio.run(scrape())
+    asyncio.run(scrape_tur_vvb())
+
+
+
+ 

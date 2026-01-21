@@ -64,9 +64,9 @@ export default function PlayerSite() {
   return (
     <div className="mx-auto max-w-4xl p-6 space-y-8 mb-12 text-gray-900 dark:text-gray-100">
       {/* Spielerinfos */}
-      <section className="rounded-2xl bg-gray-100 dark:bg-gray-800 shadow-md p-6">
+      <section className="rounded-2xl bg-gray-100 dark:bg-gray-800  p-6">
         <h1 className="text-2xl font-bold mb-4">Spieler-Informationen</h1>
-        <div className="grid grid-cols-2 gap-4 text-lg">
+        <div className="grid grid-row-3 gap-4 text-lg">
           <div>
             <span className="font-semibold">Vorname:</span> {infos.first_name}
           </div>
