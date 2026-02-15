@@ -69,7 +69,6 @@ class Player(Base):
 
     rankings: Mapped[list["RankingClean"]] = relationship(back_populates="player", cascade="all, delete-orphan")
     results: Mapped[list["Result"]] = relationship(back_populates="player", cascade="all, delete-orphan")
-
 class RankingClean(Base):
     __tablename__ = "rankings_clean"
 
@@ -82,10 +81,7 @@ class RankingClean(Base):
     rank: Mapped[str] = mapped_column(String(120))
     points: Mapped[str]=mapped_column(String(50))
 
-    player: Mapped[Player] = relationship(back_populates="rankings")
-
-    
-    
+    player: Mapped[Player] = relationship(back_populates="rankings")  
 class Result(Base):
     __tablename__ = "results"
 
@@ -104,10 +100,7 @@ class Result(Base):
 
     player: Mapped[Player] = relationship(back_populates="results")
 
- 
 class TournamentVVB(Base):
-
-
     __tablename__ = "tournaments_vvb"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -243,3 +236,66 @@ class TournamentMatch(Base):
     round: Mapped[str | None] = mapped_column(String(50), nullable=True)  # "Vorrunde", "Halbfinale", ...
     court: Mapped[str | None] = mapped_column(String(20), nullable=True)  # Platznummer
     start_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class TournamentGBT(Base):
+    __tablename__ = "tournaments_gbt"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    external_id: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+
+
+    # Grundinformationen
+    name: Mapped[str] = mapped_column(String(200), nullable=False)   
+    datum_von: Mapped[Optional[date]] = mapped_column(Date)        
+    datum_bis: Mapped[Optional[date]] = mapped_column(Date)        
+    gender: Mapped[Optional[str]] = mapped_column(String(20))        
+    typ: Mapped[Optional[str]] = mapped_column(String(100))
+    ort: Mapped[Optional[str]] = mapped_column(String(100))
+    ausrichter: Mapped[Optional[str]] = mapped_column(String(100))
+    gelaende: Mapped[Optional[str]] = mapped_column(String(100))
+    ranglisteneingang: Mapped[Optional[date]] = mapped_column(Date)        
+    meldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
+    ummeldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
+    abmeldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
+
+    # Zahlenangaben
+    gemeldete_mannschaften: Mapped[Optional[int]] = mapped_column(Integer)
+    anzahl_teams_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
+    anzahl_teams_qualifikation: Mapped[Optional[int]] = mapped_column(Integer)
+    anzahl_teams_hauptfeld_aus_qualifikation: Mapped[Optional[int]] = mapped_column(Integer)
+    zulassungsreihenfolge: Mapped[Optional[str]] = mapped_column(Text)
+    preisgeld: Mapped[Optional[str]] = mapped_column(Text)            
+    startgeld: Mapped[Optional[str]] = mapped_column(Text)
+    kaution: Mapped[Optional[str]] = mapped_column(Text)
+
+    #Infos
+    sportorganisatorische_leitung: Mapped[Optional[str]] = mapped_column(String(100))
+    teilnehmer: Mapped[Optional[str]] = mapped_column(String(100))
+    preisgeld_infos: Mapped[Optional[str]] = mapped_column(String(100))
+    ausrichter: Mapped[Optional[str]] = mapped_column(String(100))
+    startgeld_infos: Mapped[Optional[str]] = mapped_column(String(100))
+    kaution_infos: Mapped[Optional[str]] = mapped_column(String(100))
+    uebernachtung: Mapped[Optional[str]] = mapped_column(String(100))
+    physio: Mapped[Optional[str]] = mapped_column(String(100))
+    livestream: Mapped[Optional[str]] = mapped_column(String(100))
+    einschreibung: Mapped[Optional[str]] = mapped_column(String(100))
+    trikots: Mapped[Optional[str]] = mapped_column(String(100))
+    spielort: Mapped[Optional[str]] = mapped_column(String(100))
+    akkreditierungen: Mapped[Optional[str]] = mapped_column(String(100))
+    autoanreise: Mapped[Optional[str]] = mapped_column(String(100))
+    parkmöglichkeiten: Mapped[Optional[str]] = mapped_column(String(100))
+    bahnanreise: Mapped[Optional[str]] = mapped_column(String(100))
+    trainingsmöglichkeiten: Mapped[Optional[str]] = mapped_column(String(100))
+    tickets: Mapped[Optional[str]] = mapped_column(String(100))
+    zeitplan: Mapped[Optional[str]] = mapped_column(String(100))
+
+     
+    # Beziehungen zu abhängigen Tabellen
+    teams: Mapped[list["TournamentTeam"]] = relationship(
+        back_populates="tournament", cascade="all, delete-orphan"
+    )
+
+    matches: Mapped[list["TournamentMatch"]] = relationship(
+        back_populates="tournament", cascade="all, delete-orphan"
+    )

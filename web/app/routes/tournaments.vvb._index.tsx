@@ -59,7 +59,7 @@ export default function TurPageVVB() {
               name="q"
               placeholder=""
               defaultValue={params.get("q") ?? ""}
-              className="rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-gray-700"
+              className="rounded-lg bg-white py-2 pl-3 pr-8 text-gray-700"
             />
           </div>
           {/* Kategorie */}
@@ -70,7 +70,7 @@ export default function TurPageVVB() {
             <select
               name="cat"
               defaultValue={params.get("cat") ?? ""}
-              className="rounded-lg border border-gray-300 bg-white py-2 pl-3 pr-8 text-gray-700"
+              className="rounded-lg bg-white py-2 pl-3 pr-8 text-gray-700"
             >
               <option value="">Alle Kategorien</option>
               <option value="A">A</option>
@@ -99,7 +99,7 @@ export default function TurPageVVB() {
           </div>
           <div className="flex flex-col items-end">
             <div></div>
-            <button className="border px-4 py-2 rounded-lg bg-blue-600 mt-auto text-white">
+            <button className="p-2 rounded-lg bg-blue-600 mt-auto text-white">
               Filtern
             </button>
           </div>

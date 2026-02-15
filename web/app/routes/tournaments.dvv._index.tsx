@@ -129,7 +129,11 @@ export default function TurPage() {
             <span className="text-gray-700 font-medium text-center justify-center">
               Geschlecht
             </span>
-            <select name="gender" id="eins">
+            <select
+              name="gender"
+              id="eins"
+              className="rounded-lg bg-white p-2 text-gray-700"
+            >
               <option value="">Alle</option>
               <option value="männlich">männlich</option>
               <option value="weiblich">weiblich</option>
@@ -138,7 +142,7 @@ export default function TurPage() {
 
           <div className="flex flex-col items-end">
             <div></div>
-            <button className="border px-4 py-2 rounded bg-blue-600 mt-auto text-white">
+            <button className=" p-2 rounded-lg bg-blue-600 mt-auto text-white">
               Filtern
             </button>
           </div>
