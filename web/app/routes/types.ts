@@ -79,6 +79,8 @@ export type Team = {
   mannschafts_id: number;
   punkte_zulassung: string;
   setzung_reihenfolge: number;
+  dvv_punkte_zulassung: number;
+  lv_punkte_zulassung: number;
 };
 
 export type RankingClean = {

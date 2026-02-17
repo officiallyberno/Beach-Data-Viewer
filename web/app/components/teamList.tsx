@@ -20,32 +20,26 @@ export default function TeamList({
   const sortTeams = (tab: string) => {
     const sorted = [...teams];
 
-    const statusOrder: Record<string, number> = {
-      Hauptfeld: 0,
-      Nachrücker: 1,
-      Absage: 2,
-    };
     switch (tab) {
       case "meldeliste":
         return sorted.sort(
           (a, b) =>
             new Date(a.anmeldedatum).getTime() -
-            new Date(b.anmeldedatum).getTime()
+            new Date(b.anmeldedatum).getTime(),
         );
 
       case "zulassung":
         return sorted.sort((a: Team, b: Team) => {
-          return (
-            statusOrder[a.status] - statusOrder[b.status] &&
-            a.zulassung_reihenfolge - b.zulassung_reihenfolge
-          );
+          return b.dvv_punkte_zulassung - a.dvv_punkte_zulassung;
         });
+      case "zulassung_lv":
+        return sorted.sort((a: Team, b: Team) => {
+          return b.lv_punkte_zulassung - a.lv_punkte_zulassung;
+        });
+
       case "setzliste":
         return sorted.sort((a: Team, b: Team) => {
-          return (
-            statusOrder[a.status] - statusOrder[b.status] &&
-            a.setzung_reihenfolge - b.setzung_reihenfolge
-          );
+          return a.setzung_reihenfolge - b.setzung_reihenfolge;
         });
 
       case "platzierungen":
@@ -86,12 +80,14 @@ export default function TeamList({
               {displayKey === "anmeldedatum" && (
                 <span>{formatDate(team.anmeldedatum)}</span>
               )}
-              {displayKey === "punkte_zulassung" &&
+              {displayKey === "dvv_punkte_zulassung" &&
                 team.punkte_zulassung !== null && (
-                  <span>{formatDvvPoints(team.punkte_zulassung)}</span>
+                  <span>{team.dvv_punkte_zulassung}</span>
                 )}
-              {displayKey === "punkte_zulassung" &&
-                team.punkte_zulassung === null && <span>{team.status}</span>}
+              {displayKey === "lv_punkte_zulassung" &&
+                team.punkte_zulassung !== null && (
+                  <span>{team.lv_punkte_zulassung}</span>
+                )}
 
               {displayKey === "punkte_setzung" &&
                 team.punkte_setzung !== null && (

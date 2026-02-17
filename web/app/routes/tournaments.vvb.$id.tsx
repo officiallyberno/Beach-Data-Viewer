@@ -158,7 +158,7 @@ export default function TournamentDetail() {
                 <div className="grid grid-cols-1 sm:grid-cols-1 gap-x-10 gap-y-4 text-gray-200">
                   {dateMarks
                     .filter(
-                      (d) => d.value && d.value !== "null" && d.value !== ""
+                      (d) => d.value && d.value !== "null" && d.value !== "",
                     )
                     .map((d) => (
                       <div
@@ -177,7 +177,7 @@ export default function TournamentDetail() {
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-x-10 gap-y-4 text-gray-200">
                   {importantInformation
                     .filter(
-                      (d) => d.value && d.value !== "null" && d.value !== ""
+                      (d) => d.value && d.value !== "null" && d.value !== "",
                     )
                     .map((d) => (
                       <div
@@ -196,7 +196,7 @@ export default function TournamentDetail() {
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-x-10 gap-y-4 text-gray-200">
                   {details
                     .filter(
-                      (d) => d.value && d.value !== "null" && d.value !== ""
+                      (d) => d.value && d.value !== "null" && d.value !== "",
                     )
                     .map((d) => (
                       <div
@@ -237,16 +237,33 @@ export default function TournamentDetail() {
         )}
 
         {activeTab === "zulassung" && (
-          <TeamList
-            teams={teams}
-            title={
-              isZulassungFinal
-                ? "Zulassung"
-                : `Zulassung: ${formatDate(tournament.zulassungstermin)}`
-            }
-            activeTab={activeTab}
-            displayKey="punkte_zulassung"
-          />
+          <div>
+            <TeamList
+              teams={teams}
+              title={
+                isZulassungFinal
+                  ? "Zulassung - Reihenfolge nach DVV"
+                  : `Zulassung: ${formatDate(
+                      tournament.zulassungstermin,
+                    )} - - Reihenfolge nach DVV`
+              }
+              activeTab={activeTab}
+              displayKey="dvv_punkte_zulassung"
+            />
+
+            <TeamList
+              teams={teams}
+              title={
+                isZulassungFinal
+                  ? "Zulassung - Reihenfolge nach Landesverbandspunkten"
+                  : `Zulassung: ${formatDate(
+                      tournament.zulassungstermin,
+                    )}- Reihenfolge nach Landesverbandspunkten`
+              }
+              activeTab={activeTab}
+              displayKey="lv_punkte_zulassung"
+            />
+          </div>
         )}
 
         {activeTab === "setzliste" && (
@@ -256,7 +273,7 @@ export default function TournamentDetail() {
               isSetzungFinal
                 ? "Setzung"
                 : `Setzung: ${formatDateTime(
-                    tournament.termin_technical_meeting
+                    tournament.termin_technical_meeting,
                   )}`
             }
             activeTab={activeTab}

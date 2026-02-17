@@ -290,12 +290,4 @@ class TournamentGBT(Base):
     tickets: Mapped[Optional[str]] = mapped_column(String(100))
     zeitplan: Mapped[Optional[str]] = mapped_column(String(100))
 
-     
-    # Beziehungen zu abhängigen Tabellen
-    teams: Mapped[list["TournamentTeam"]] = relationship(
-        back_populates="tournament", cascade="all, delete-orphan"
-    )
-
-    matches: Mapped[list["TournamentMatch"]] = relationship(
-        back_populates="tournament", cascade="all, delete-orphan"
-    )
+    

@@ -391,12 +391,7 @@ def parse_zulassungspunkte(text: str) -> tuple[int, int]:
     lv_match = re.search(r"LV.*?:\s*(\d+)", text)
     dvv_match = re.search(r"DVV.*?:\s*(\d+)", text)
 
-    if not lv_match or not dvv_match:
-        lv_punkte_zulassung =-1
-        dvv_punkte_zulassung = -1
-        return dvv_punkte_zulassung, lv_punkte_zulassung
-
-    lv_punkte_zulassung = int(lv_match.group(1))
-    dvv_punkte_zulassung = int(dvv_match.group(1))
+    lv_punkte_zulassung = int(lv_match.group(1)) if lv_match else -1
+    dvv_punkte_zulassung = int(dvv_match.group(1)) if dvv_match else -1
 
     return dvv_punkte_zulassung, lv_punkte_zulassung

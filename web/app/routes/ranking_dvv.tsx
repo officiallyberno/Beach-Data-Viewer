@@ -21,8 +21,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   const res = await fetch(
     `http://localhost:8000/rank/${association}/${year}?gender=${encodeURIComponent(
-      gender
-    )}&q=${encodeURIComponent(q)}`
+      gender,
+    )}&q=${encodeURIComponent(q)}`,
   );
 
   if (!res.ok) {
@@ -100,7 +100,7 @@ export default function CleanRanking() {
             <li
               key={r.id}
               className="flex justify-between items-center pr-5 hover:bg-gray-700/70 transition-all duration-150 hover:cursor-pointer"
-              onClick={() => navigate(`/players/${r.player.external_id}`)}
+              onClick={() => navigate(`/player/${r.player.external_id}`)}
             >
               <div>
                 <div className="flex items-center space-x-4">

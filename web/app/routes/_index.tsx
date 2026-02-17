@@ -99,6 +99,16 @@ export default function HomePage() {
               SHVV
             </a>
           </li>
+          <li>
+            <a
+              href="https://www.hvbv.de/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-xl bg-pink-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-pink-700 transition"
+            >
+              HVBV
+            </a>
+          </li>
         </ul>
       </section>
       <section>
