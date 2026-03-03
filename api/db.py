@@ -32,9 +32,6 @@ class Base(DeclarativeBase):
 
 class Tournament(Base):
     __tablename__ = "tournaments"
-    # __table_args__ = (
-    #     UniqueConstraint("datum", "ort", "geschlecht", name="uq_tournament"),
-    # )
 
     id:           Mapped[int]  = mapped_column(Integer, primary_key=True)
     start_datum:  Mapped[str]  = mapped_column((Date))

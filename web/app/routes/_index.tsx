@@ -29,7 +29,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-blue-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-blue-700 transition"
             >
-              DVV
+              German Beach Tour
             </a>
           </li>
           <li>
@@ -39,7 +39,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-pink-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-pink-700 transition"
             >
-              World Tour 2025
+              Beach Pro Tour
             </a>
           </li>
         </ul>
@@ -56,7 +56,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-red-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-red-700 transition"
             >
-              VVB
+              Berlin
             </a>
           </li>
           <li>
@@ -66,7 +66,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-yellow-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-yellow-700 transition"
             >
-              VMV
+              Mecklenburg-Vorpommern
             </a>
           </li>
           <li>
@@ -76,7 +76,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-green-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-green-700 transition"
             >
-              VVSA
+              Sachsen-Anhalt
             </a>
           </li>
           <li>
@@ -86,7 +86,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-lime-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-lime-700 transition"
             >
-              SSVB
+              Sachsen
             </a>
           </li>
           <li>
@@ -96,7 +96,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-pink-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-pink-700 transition"
             >
-              SHVV
+              Schleswig-Holstein
             </a>
           </li>
           <li>
@@ -106,7 +106,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="block rounded-xl bg-pink-600 px-6 py-4 text-white text-center font-medium shadow hover:bg-pink-700 transition"
             >
-              HVBV
+              Hamburg
             </a>
           </li>
         </ul>

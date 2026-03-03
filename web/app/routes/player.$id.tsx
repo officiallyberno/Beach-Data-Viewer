@@ -1,8 +1,10 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { div } from "framer-motion/client";
+import { ArrowBigLeft } from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatDate } from "~/utils/date";
+import { tur_name, tur_partner } from "~/utils/tur_details";
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const id = params.id;
@@ -63,7 +65,7 @@ export type PlayerInfos = {
 
 export default function PlayerSite() {
   const { ranks, infos, results } = useLoaderData<typeof loader>();
-
+  let counter = 0;
   const rankingsByYear = useMemo(() => {
     return ranks.reduce<Record<string, PlayerRankingsHistory[]>>(
       (acc, rank) => {
@@ -101,24 +103,29 @@ export default function PlayerSite() {
   return (
     <div className="mx-auto max-w-4xl p-6 space-y-8 mb-12 text-gray-900 dark:text-gray-100">
       {/* Spielerinfos */}
-      <h1 className="text-2xl font-bold mb-4">
-        {infos.first_name} {infos.last_name}
-      </h1>
-      <div className="flex flex-row m-2 justify-center">
-        <section className="rounded-2xl border m-2 p-6 w-1/3">
-          <div className="grid grid-row-3 gap-4 text-lg">
-            <div>
-              <span className="font-semibold">Lizenz:</span> {infos.external_id}
-            </div>
-            <div>
-              <span className="font-semibold">Verein:</span> {infos.club}
-            </div>
-          </div>
-        </section>
-
+      <div className="flex flex-row place-items-baseline">
+        <Link
+          to="/ranking_dvv"
+          className="text-white hover:bg-gray-700 mr-4 rounded-md p-1"
+        >
+          <ArrowBigLeft />
+        </Link>
+        <h1 className="text-3xl font-bold mb-2">
+          {infos.first_name} {infos.last_name}
+        </h1>
+        <Link
+          to={`https://beach.volleyball-verband.de/public/spieler.php?id=${infos.external_id}`}
+          target="_blank"
+          className="ml-6 underline"
+        >
+          {infos.external_id}➚
+        </Link>
+      </div>
+      <span className="ml-12"> {infos.club}</span>
+      <div className="grid grid-row-3 gap-4 text-lg">
         {/* Rankings */}
         <section className="border rounded-2xl m-2 p-6 w-1/2">
-          <div className="font-extrabold text-xl">Ranglistenplätze</div>
+          <div className="font-extrabold text-xl">Rangliste</div>
           <thead>
             <tr className="">
               <th className="p-2 text-left">Datum</th>
@@ -158,7 +165,6 @@ export default function PlayerSite() {
           </select>
         </div>
       </div>
-
       {/* Ergebnisse */}
       <section className="border rounded-2xl p-6">
         <div className="font-extrabold text-xl">Ergebnisse</div>
@@ -168,29 +174,70 @@ export default function PlayerSite() {
               <tr className="">
                 <th className="p-2">Datum</th>
                 <th className="p-2">Turnier</th>
-                <th className="p-2">Team</th>
+                <th className="p-2">Ort</th>
+                <th className="p-2">Partner</th>
                 <th className="p-2">Platz</th>
                 <th className="p-2">Punkte</th>
               </tr>
             </thead>
+
             <tbody>
-              {resultsByYear[selectedYear]?.map((r) => (
-                <tr key={r.id} className="border-b border-gray-300">
-                  <td className="p-2">{formatDate(r.date)}</td>
-                  <td className="p-2 max-w-xs">{r.tournament_name}</td>
-                  <td className="p-2">{r.partner}</td>
-                  <td className="p-2">{r.rank}</td>
-                  <td className="p-2">{r.points}</td>
-                  <td className="">{r.association}</td>
-                </tr>
-              ))}
+              {resultsByYear[selectedYear]?.map((r) => {
+                counter++;
+                return (
+                  <tr key={r.id} className="border-b border-gray-300">
+                    <td className="p-2">{formatDate(r.date)}</td>
+                    <td className="p-2 max-w-xs">
+                      {tur_name(r.tournament_name)}
+                    </td>
+                    <td className="p-2">{r.location}</td>
+                    <td className="p-2">
+                      {tur_partner(r.partner.toString(), infos.last_name)}
+                    </td>
+                    <td className="p-2">{r.rank}</td>
+                    <td className="p-2">{r.points}</td>
+                    <td className="">{r.association}</td>
+                  </tr>
+                );
+              })}
             </tbody>
+            <div>Insgesamt: {counter}</div>
           </div>
         ) : (
           <div className="">
             Es wurden anscheinend (noch) keine Turniere in diesem Jahr gespielt.
           </div>
         )}
+      </section>
+      <section>
+        <div className="mb-2 font-bold">Legende:</div>
+        <div className="flex flex-grid gap-2 justify-between">
+          <div className="flex flex-col">
+            <div className="font-semibold">Internationale Wettbewerbe</div>
+            <div>Oympische Spiele</div>
+            <div>Weltmeisterschaft</div>
+            <div>Europameisterschaft</div>
+          </div>
+          <div className="flex flex-col">
+            <div className="font-semibold">Beach Pro Tour</div>
+            <div>Elite-16</div>
+            <div>Challenge</div>
+            <div>Future</div>
+          </div>
+          <div className="flex flex-col">
+            <div className="font-semibold">Nationale Turniere</div>
+            <div>Deutsche Meisterschaften</div>
+            <div>German Beach Tour</div>
+            <div>Rock the Beach</div>
+            <div>Deutsche Hochschulmeisterschaften</div>
+          </div>
+          <div className="flex flex-col">
+            <div className="font-semibold">Regionale Turniere</div>
+            <div>Premium</div>
+            <div>A+</div>
+            <div>A</div>
+          </div>
+        </div>
       </section>
     </div>
   );

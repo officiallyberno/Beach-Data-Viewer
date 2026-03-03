@@ -24,13 +24,17 @@ export async function loader({ params }: LoaderFunctionArgs) {
   return json({ teams, tournament });
 }
 
-const tabs = [
-  { key: "details", label: "Details" },
-  { key: "meldeliste", label: "Meldeliste" },
-  { key: "zulassung", label: "Zulassung" },
-  { key: "setzliste", label: "Setzliste" },
-  { key: "spiele", label: "Spiele" },
-  { key: "platzierungen", label: "Platzierungen" },
+export const getTabs = (published: any) => [
+  { key: "details", label: "Details", published: true },
+  { key: "meldeliste", label: "Meldeliste", published: true },
+  { key: "zulassung", label: "Zulassung", published: published.zulassung },
+  { key: "setzliste", label: "Setzliste", published: published.setzliste },
+  { key: "spiele", label: "Spiele", published: published.spiele },
+  {
+    key: "platzierungen",
+    label: "Platzierungen",
+    published: published.platzierungen,
+  },
 ];
 
 type LoaderData = {
@@ -113,9 +117,19 @@ export default function TournamentDetail() {
   const now = new Date();
   const zulassungstermin = new Date(tournament.zulassungstermin);
   const setzungstermin = new Date(tournament.termin_technical_meeting);
+  const ende = new Date(tournament.starttermin);
 
   const isZulassungFinal = now >= zulassungstermin;
-  const isSetzungFinal = now >= zulassungstermin;
+  const isSetzungFinal = now >= setzungstermin;
+  const isTourFinal = now >= ende;
+
+  const published = {
+    zulassung: isZulassungFinal,
+    setzliste: isSetzungFinal,
+    spiele: isTourFinal,
+    platzierungen: isTourFinal,
+  };
+  const tabs = getTabs(published);
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -129,20 +143,22 @@ export default function TournamentDetail() {
         >
           <ArrowBigLeft />
         </Link>
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2 rounded-lg transition
+        {tabs
+          .filter((t) => t.published)
+          .map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              className={`px-4 py-2 rounded-lg transition
               ${
                 activeTab === t.key
                   ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
-          >
-            {t.label}
-          </button>
-        ))}
+            >
+              {t.label}
+            </button>
+          ))}
       </div>
 
       {/* Inhalt je nach Tab */}

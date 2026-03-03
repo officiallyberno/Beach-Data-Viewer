@@ -17,7 +17,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const gender = url.searchParams.get("gender") ?? "Männer";
   const q = url.searchParams.get("q")?.toLowerCase() ?? "";
   const association = "DVV";
-  const year = "2025";
+  const year = "2026";
 
   const res = await fetch(
     `http://localhost:8000/rank/${association}/${year}?gender=${encodeURIComponent(
@@ -63,7 +63,7 @@ export default function CleanRanking() {
 
   return (
     <div className="max-w-3xl mx-auto mb-10 p-6">
-      <h1 className="text-3xl font-bold mb-4">Rangliste 2025</h1>
+      <h1 className="text-3xl font-bold mb-4">Rangliste 2026</h1>
 
       <Form method="get" className="flex items-center gap-4 mb-6">
         <input

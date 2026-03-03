@@ -23,7 +23,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       (t) =>
         t.ort.toLowerCase().includes(q) ||
         t.ausrichter.toLowerCase().includes(q) ||
-        t.starttermin.includes(q)
+        t.starttermin.includes(q),
     );
   }
 
@@ -35,10 +35,10 @@ export default function TurPageVVB() {
   const [params] = useSearchParams();
   const today = new Date();
   const futureTournaments = tournaments.filter(
-    (t) => new Date(t.starttermin) >= today
+    (t) => new Date(t.starttermin) >= today,
   );
   const pastTournaments = tournaments.filter(
-    (t) => new Date(t.starttermin) <= today
+    (t) => new Date(t.starttermin) <= today,
   );
 
   const [showPast, setShowPast] = useState(false);
@@ -48,20 +48,7 @@ export default function TurPageVVB() {
     <div>
       <TurNavigation />
       <div className="w-full mx-auto mb-16 p-6">
-        <Form method="get" className="flex flex-wrap gap-4 mb-6">
-          {/* Suche */}
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-gray-700 font-medium text-center justify-center">
-              Suche
-            </span>
-            <input
-              type="text"
-              name="q"
-              placeholder=""
-              defaultValue={params.get("q") ?? ""}
-              className="rounded-lg bg-white py-2 pl-3 pr-8 text-gray-700"
-            />
-          </div>
+        <Form method="get" className="flex flex-wrap justify-end gap-4 mb-2">
           {/* Kategorie */}
           <div className="flex flex-col items-center gap-1">
             <span className="text-gray-700 font-medium text-center justify-center">
@@ -70,7 +57,7 @@ export default function TurPageVVB() {
             <select
               name="cat"
               defaultValue={params.get("cat") ?? ""}
-              className="rounded-lg bg-white py-2 pl-3 pr-8 text-gray-700"
+              className="rounded-lg bg-white p-2 text-gray-700"
             >
               <option value="">Alle Kategorien</option>
               <option value="A">A</option>
@@ -104,42 +91,50 @@ export default function TurPageVVB() {
             </button>
           </div>
         </Form>
+        <div className="flex flex-grid justify-between">
+          <div className="place-content-end">
+            <button
+              onClick={() => setShowPast(!showPast)}
+              className="px-4 py-2 rounded"
+            >
+              {showPast ? (
+                <div className="flex flex-row bg-gray-800 rounded-lg p-2">
+                  <ChevronDown />
+                  <h2 className="text-xl font-bold ml-2">
+                    Vergangene Turniere
+                  </h2>
+                </div>
+              ) : (
+                <div className="flex flex-row p-2">
+                  <ChevronUp />
+                  <h2 className="text-xl font-bold ml-2">
+                    Vergangene Turniere
+                  </h2>
+                </div>
+              )}
+            </button>
+            {showPast && (
+              <TournamentGrid tournaments={pastTournaments} basePath="vvb" />
+            )}
+            <button
+              onClick={() => setShowFuture(!showFuture)}
+              className="px-4 py-2 rounded"
+            >
+              {showFuture ? (
+                <div className="flex flex-row bg-gray-800 rounded-lg p-2">
+                  <ChevronDown />
+                  <h2 className="text-xl font-bold ml-2">Aktuelle Turniere</h2>
+                </div>
+              ) : (
+                <div className="flex flex-row p-2">
+                  <ChevronUp />
+                  <h2 className="text-xl font-bold ml-2">Aktuelle Turniere</h2>
+                </div>
+              )}
+            </button>
+          </div>
+        </div>
 
-        <button
-          onClick={() => setShowPast(!showPast)}
-          className="px-4 py-2 rounded"
-        >
-          {showPast ? (
-            <div className="flex flex-row bg-gray-800 rounded-lg p-2">
-              <ChevronDown />
-              <h2 className="text-xl font-bold ml-2">Vergangene Turniere</h2>
-            </div>
-          ) : (
-            <div className="flex flex-row p-2">
-              <ChevronUp />
-              <h2 className="text-xl font-bold ml-2">Vergangene Turniere</h2>
-            </div>
-          )}
-        </button>
-        {showPast && (
-          <TournamentGrid tournaments={pastTournaments} basePath="vvb" />
-        )}
-        <button
-          onClick={() => setShowFuture(!showFuture)}
-          className="px-4 py-2 rounded"
-        >
-          {showFuture ? (
-            <div className="flex flex-row bg-gray-800 rounded-lg p-2">
-              <ChevronDown />
-              <h2 className="text-xl font-bold ml-2">Aktuelle Turniere</h2>
-            </div>
-          ) : (
-            <div className="flex flex-row p-2">
-              <ChevronUp />
-              <h2 className="text-xl font-bold ml-2">Aktuelle Turniere</h2>
-            </div>
-          )}
-        </button>
         {showFuture && (
           <TournamentGrid tournaments={futureTournaments} basePath="vvb" />
         )}
