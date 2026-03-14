@@ -23,7 +23,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       (t) =>
         t.ort.toLowerCase().includes(q) ||
         t.ausrichter.toLowerCase().includes(q) ||
-        t.starttermin.includes(q),
+        t.datum_von.includes(q),
     );
   }
 
@@ -35,10 +35,10 @@ export default function TurPageVVB() {
   const [params] = useSearchParams();
   const today = new Date();
   const futureTournaments = tournaments.filter(
-    (t) => new Date(t.starttermin) >= today,
+    (t) => new Date(t.datum_von) >= today,
   );
   const pastTournaments = tournaments.filter(
-    (t) => new Date(t.starttermin) <= today,
+    (t) => new Date(t.datum_von) <= today,
   );
 
   const [showPast, setShowPast] = useState(false);
@@ -91,7 +91,8 @@ export default function TurPageVVB() {
             </button>
           </div>
         </Form>
-        <div className="flex flex-grid justify-between">
+
+        <div className="">
           <div className="place-content-end">
             <button
               onClick={() => setShowPast(!showPast)}
@@ -116,6 +117,7 @@ export default function TurPageVVB() {
             {showPast && (
               <TournamentGrid tournaments={pastTournaments} basePath="vvb" />
             )}
+
             <button
               onClick={() => setShowFuture(!showFuture)}
               className="px-4 py-2 rounded"

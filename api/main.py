@@ -5,7 +5,7 @@ from datetime import date
 from typing import Annotated, List, Optional
 from fastapi import Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.db import Player, Ranking, RankingClean, SessionLocal, Tournament, Result, TournamentTeam, TournamentVVB
+from api.db import Player, Ranking, RankingClean, SessionLocal, Result, TournamentTeam, TournamentVVB
 from sqlalchemy import and_, or_, select
 from fastapi import FastAPI
 from api.schemas import RankingSchema, TournamentSchema, TournamentTeamListSchema   # ← neu importieren
@@ -17,37 +17,19 @@ async def get_db():
     async with SessionLocal() as session:
         yield session
 
-@app.get("/tournaments", response_model=list[TournamentSchema])
-  
-async def list_tournaments(
-    kategorie : Annotated[Optional[str], Query(alias="cat")] = None,
-    verband   : Annotated[Optional[str], Query(alias="org")] = None,
-    geschlecht: Annotated[Optional[str], Query(alias="gender")] = None,
-    future    : Annotated[bool,           Query(alias="onlyFuture")] = False,
-    db:        AsyncSession = Depends(get_db),
-):
-    stmt = select(Tournament)
-
-    conds = []
-    if kategorie:
-        cond = Tournament.kategorie.ilike(f"%{kategorie}%")
-        print("→ Bedingung Kategorie:", cond)
-        conds.append(cond)
-    if verband:
-        conds.append(Tournament.veranstalter.ilike(f"%{verband}%"))
-    if geschlecht:
-        conds.append(Tournament.geschlecht.ilike(f"%{geschlecht}%"))
-    if future:
-        conds.append(
-            Tournament.start_datum.op("~")(r"-\s*(\d{2}\.\d{2}\.\d{4})$")
-            & (Tournament.start_datum.like(f"%{date.today().year}%"))
-        )
-       
-    if conds:
-        stmt = stmt.where(and_(*conds))
+@app.get("/landesverband")
+async def list_tournaments(db:AsyncSession = Depends(get_db)):
+    stmt = select(TournamentVVB).where(TournamentVVB.quelle=="LV_DVV")
     
-    result = await db.execute(stmt.order_by(Tournament.start_datum))
+    result = await db.execute(stmt)
     return result.scalars().all()
+@app.get("/dvv")
+async def list_tournaments(db:AsyncSession = Depends(get_db)):
+    stmt = select(TournamentVVB).where(TournamentVVB.quelle=="DVV Turniere")
+    
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
 
 
 @app.get("/rankings", response_model=list[RankingSchema])
@@ -75,12 +57,12 @@ async def list_rankings(
     result = await db.execute(stmt)
     return result.scalars().all()
 
-@app.get("/tournaments/{tournament_id}", response_model=TournamentSchema)
+@app.get("/landesverband/{tournament_id}")
 async def get_tournament(
     tournament_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(Tournament).where(Tournament.id == tournament_id)
+    stmt = select(TournamentVVB).where(TournamentVVB.quelle== "LV_DVV").where(TournamentVVB.id == tournament_id)
     result = await db.execute(stmt)
     tournament = result.scalar_one_or_none()
 
@@ -121,7 +103,7 @@ async def get_all_tournaments(
     geschlecht: Annotated[Optional[str], Query(alias="gender")] = None,
     future    : Annotated[bool,           Query(alias="onlyFuture")] = False,
     db: AsyncSession = Depends(get_db)):
-    stmt = select(TournamentVVB)
+    stmt = select(TournamentVVB).where(TournamentVVB.quelle== "VVB")
 
     conds = []
     if kategorie:
@@ -153,7 +135,7 @@ async def get_tournament_by_id(
     tournament_id: int,
     db: AsyncSession = Depends(get_db),
 ):
-    stmt = select(TournamentVVB).where(TournamentVVB.id == tournament_id)
+    stmt = select(TournamentVVB).where(TournamentVVB.quelle== "VVB").where(TournamentVVB.id == tournament_id)
     result = await db.execute(stmt)
     tournament = result.scalar_one_or_none()
 

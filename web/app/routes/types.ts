@@ -2,7 +2,8 @@ export type TournamentVVB = {
   id: number;
   name: string;
   kategorie: string;
-  starttermin: string;
+  datum_von: string;
+  datum_bis: string;
   zulassungstermin: string;
   ort: string;
   gender?: string;
@@ -40,15 +41,15 @@ export type TournamentVVB = {
   platzierungen?: any[];
 };
 
-export type Tournament = {
-  id: number;
-  start_datum: string;
-  end_datum: string;
-  ort: string;
-  geschlecht: string;
-  kategorie: string;
-  veranstalter: string;
-};
+// export type Tournament = {
+//   id: number;
+//   start_datum: string;
+//   end_datum: string;
+//   ort: string;
+//   geschlecht: string;
+//   kategorie: string;
+//   veranstalter: string;
+// };
 
 export type Tournament2 = {
   id: number;

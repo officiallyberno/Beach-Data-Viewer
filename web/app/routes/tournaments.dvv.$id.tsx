@@ -3,13 +3,13 @@
 import { useLoaderData, useParams } from "@remix-run/react";
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { useState } from "react";
-import { Tournament } from "~/routes/types";
+import { TournamentVVB } from "~/routes/types";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const id = params.id;
 
-  const res = await fetch(`http://localhost:8000/tournaments/${id}`);
-  const tournament: Tournament = await res.json();
+  const res = await fetch(`http://localhost:8000/landesverband/${id}`);
+  const tournament: TournamentVVB = await res.json();
 
   if (!tournament) {
     throw new Response("Not Found", { status: 404 });
@@ -26,7 +26,7 @@ const tabs = [
   { key: "platzierungen", label: "Platzierungen" },
 ];
 export default function TournamentDetail() {
-  const { tournament } = useLoaderData<{ tournament: Tournament }>();
+  const { tournament } = useLoaderData<{ tournament: TournamentVVB }>();
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("details");
   return (
@@ -58,11 +58,11 @@ export default function TournamentDetail() {
             <h2 className="text-xl font-semibold mb-2">Details</h2>
 
             <p>
-              Datum: {tournament.start_datum} – {tournament.end_datum}
+              Datum: {tournament.datum_von} – {tournament.datum_bis}
             </p>
             <p>Kategorie: {tournament.kategorie}</p>
-            <p>Veranstalter: {tournament.veranstalter}</p>
-            <p>Geschlecht: {tournament.geschlecht}</p>
+            <p>Veranstalter: {tournament.ausrichter}</p>
+            <p>Geschlecht: {tournament.gender}</p>
             <p>ID: {tournament.id}</p>
           </section>
         )}

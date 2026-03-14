@@ -10,11 +10,12 @@ from scraper.dateUtils import parse_date_range
 
 
 
-URL = "https://beach.volleyball-verband.de/public/tur.php?kat=2&saison=26"
+
+URL = "https://beach.volleyball-verband.de/public/tur.php?kat=1&bytyp=0&saison=25#"
 
 
 
-async def scrape_tur_lv():
+async def scrape_tur_dvv():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
@@ -36,28 +37,27 @@ async def scrape_tur_lv():
                 tds = r.select("td")[:5]
 
                 datum = tds[0].get_text(strip=True)
-                verband = tds[1].get_text(strip=True)
-                kategorie = tds[2].get_text(strip=True)
-                ort = tds[3].get_text(strip=True)
+                kategorie = tds[1].get_text(strip=True)
+                ort = tds[2].get_text(strip=True)
+                geschlecht = tds[3].get_text(strip=True)
+                teams = tds[4].get_text(strip=True)
 
-                geschlecht_tag = tds[4].select_one("a")
-                geschlecht = geschlecht_tag.get_text(strip=True)
-
+                geschlecht_tag = tds[3].select_one("a")
                 href = geschlecht_tag["href"]
                 external_id = href.split("id=")[1]
 
                 start_datum, end_datum = parse_date_range(datum)
-                print(f"{external_id} | {start_datum} | {end_datum} | {verband} | {kategorie} | {ort} | {geschlecht}")
+                print(f"{external_id} | {start_datum} | {end_datum} | {kategorie} | {ort} | {geschlecht} | {teams}")
                 stmt = insert(TournamentVVB).values(
                     datum_von= start_datum,
-                    datum_bis = end_datum,
+                    datum_bis= end_datum,
                     ort=ort,
                     gender=geschlecht,
                     kategorie= kategorie.replace("Kategorie", "").strip(),
-                    ausrichter=verband,
                     external_id=external_id,
-                    name="Landesverbandsturnier",
-                    quelle="LV_DVV"
+                    name="Deutsche Tour",
+                    quelle="DVV Turniere",
+                    gemeldete_mannschaften= int(teams)
                 )
             
                 await session.execute(stmt)
@@ -65,4 +65,4 @@ async def scrape_tur_lv():
     await browser.close()
 
 if __name__ == "__main__":
-     asyncio.run(scrape_tur_lv())
+     asyncio.run(scrape_tur_dvv())

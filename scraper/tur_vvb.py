@@ -56,7 +56,8 @@ async def scrape_tur_vvb():
                     kategorie=cat.replace("BB | Kategorie", "").strip(),
                     gender=geschlecht,
                     anmeldung_url=detail_url,
-                    external_id=str (external_id)
+                    external_id=str (external_id),
+                    quelle="VVB"
                 )
 
                 
@@ -69,11 +70,6 @@ async def scrape_tur_vvb():
                 await scrape_registrations(browser, session, external_id, "seeds")
                 await scrape_registrations(browser, session, external_id, "rankings")
             await session.commit()
-
-
-
-           
-
         await browser.close()
 
 

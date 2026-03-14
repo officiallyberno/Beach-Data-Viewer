@@ -43,7 +43,7 @@ export default function TournamentGrid({
                 {t.kategorie}
               </span>
               <span className="text-sm font-semibold">
-                {formatDate(t.starttermin)}
+                {formatDate(t.datum_von)}
               </span>
               <span
                 className={`px-2 py-1 text-xs font-medium rounded-full ${

@@ -14,6 +14,14 @@ export function tur_name(tournament_name: string) {
   if (tournament_name == "Kategorie 2") return "Kat. 2";
   if (tournament_name == "Deutsche Beach-Volleyball Meisterschaften U20")
     return "DM U20";
+  if (tournament_name == "Deutsche Beach-Volleyball Tour\\German Beach Tour")
+    return "German Beach Tour";
+  if (
+    tournament_name == "Deutsche Beach-Volleyball Tour\\Urlaubsguru Beach Cup"
+  )
+    return "Urlaubsguru Beach Cup";
+  if (tournament_name == "Deutsche Beach-Volleyball Tour\\ROCK the BEACH")
+    return "Rock the Beach";
   else return tournament_name;
 }
 export function tur_partner(tur_team: string, tur_player: string) {

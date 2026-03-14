@@ -124,7 +124,7 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
           db_field = ATTRIBUTE_MAP[normalized_key]
           scraped_data[db_field] = raw_value
 
-        date_fields = ["starttermin", "zulassungstermin" ]  
+        date_fields = ["datum_von", "zulassungstermin" ]  
         datetime_fields=["meldeschluss","start_hauptfeld", "termin_technical_meeting", "start_endspiele", "einschreibetermin"]
         
         for field in date_fields:
@@ -319,7 +319,7 @@ ATTRIBUTE_MAP = {
     "turnier": "name",
     "turnierhierarchie": "turnierhierarchie",
     "ort": "ort",
-    "datum": "starttermin",
+    "datum": "datum_von",
     "geschlecht": "gender",
     "ausrichter": "ausrichter",
     "kontakt": "kontakt",
@@ -356,7 +356,7 @@ scraped_data = {
     "name": None,
     "turnierhierarchie": None,
     "ort": None,
-    "starttermin": None,
+    "datum_von": None,
     "gender": None,
     "ausrichter": None,
     "contact": None,

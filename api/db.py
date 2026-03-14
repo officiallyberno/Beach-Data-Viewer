@@ -9,16 +9,13 @@ from sqlalchemy import Date, DateTime, Float, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
-# 1️⃣  .env-Datei laden – am besten ganz oben
 env_path = Path(__file__).resolve().parents[1] / ".env"
-load_dotenv(dotenv_path=env_path)          # lädt Variablen aus <projektroot>/.env
+load_dotenv(dotenv_path=env_path)          
 
-# 2️⃣  SQLAlchemy + AsyncPG einrichten
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-from sqlalchemy import String, Integer #, UniqueConstraint
+from sqlalchemy import String, Integer 
 
-# → jetzt ist DATABASE_URL sicher gesetzt
 DATABASE_URL = getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise RuntimeError("❌  Umgebungsvariable DATABASE_URL fehlt!")
@@ -26,20 +23,8 @@ if not DATABASE_URL:
 engine = create_async_engine(DATABASE_URL, echo=True)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
-# 3️⃣  Basisklasse + Modell
 class Base(DeclarativeBase):
     pass
-
-class Tournament(Base):
-    __tablename__ = "tournaments"
-
-    id:           Mapped[int]  = mapped_column(Integer, primary_key=True)
-    start_datum:  Mapped[str]  = mapped_column((Date))
-    end_datum:    Mapped[str]  = mapped_column((Date))
-    ort:          Mapped[str]  = mapped_column(String(100))
-    geschlecht:   Mapped[str]  = mapped_column(String(10))
-    kategorie:    Mapped[str]  = mapped_column(String(80))
-    veranstalter: Mapped[str]  = mapped_column(String(20))
 
 
 class Ranking(Base):
@@ -106,20 +91,28 @@ class TournamentVVB(Base):
 
     # Grundinformationen
     name: Mapped[str] = mapped_column(String(200), nullable=False)           # Turniername
-    kategorie: Mapped[Optional[str]] = mapped_column(String(50))
-    starttermin: Mapped[Optional[date]] = mapped_column(Date)
+    quelle: Mapped[str] = mapped_column(String(200), nullable=False)           # Quelle
+    kategorie: Mapped[Optional[str]] = mapped_column(String(200))
+    datum_von: Mapped[Optional[date]] = mapped_column(Date)        
+    datum_bis: Mapped[Optional[date]] = mapped_column(Date) 
     zulassungstermin: Mapped[Optional[date]] = mapped_column(Date)
     ort: Mapped[Optional[str]] = mapped_column(String(100))
-    gender: Mapped[Optional[str]] = mapped_column(String(20))                # "M", "F" o.ä.
+    gender: Mapped[Optional[str]] = mapped_column(String(20))               
     anmeldung_url: Mapped[Optional[str]] = mapped_column(String(255))
     meldeschluss: Mapped[Optional[date]] = mapped_column(Date)
+    ummeldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
+    abmeldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
     ausrichter: Mapped[Optional[str]] = mapped_column(String(100))
     altersklasse: Mapped[Optional[str]] = mapped_column(String(50))
+    gelaende: Mapped[Optional[str]] = mapped_column(String(100))
+    ranglisteneingang: Mapped[Optional[date]] = mapped_column(Date)        
+
 
     # Zahlenangaben
     gemeldete_mannschaften: Mapped[Optional[int]] = mapped_column(Integer)
     anzahl_teams_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
     anzahl_teams_qualifikation: Mapped[Optional[int]] = mapped_column(Integer)
+    anzahl_teams_hauptfeld_aus_qualifikation: Mapped[Optional[int]] = mapped_column(Integer)
     zulassungsreihenfolge: Mapped[Optional[str]] = mapped_column(Text)
     preisgeld: Mapped[Optional[str]] = mapped_column(Text)            
     startgeld: Mapped[Optional[str]] = mapped_column(Text)
@@ -143,6 +136,27 @@ class TournamentVVB(Base):
     courts_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
     sachpreise: Mapped[Optional[str]] = mapped_column(Text)
     anmerkungen: Mapped[Optional[str]] = mapped_column(Text)
+
+    #GBT
+    sportorganisatorische_leitung: Mapped[Optional[str]] = mapped_column(String(100))
+    teilnehmer: Mapped[Optional[str]] = mapped_column(String(100))
+    preisgeld_infos: Mapped[Optional[str]] = mapped_column(String(100))
+    ausrichter_infos: Mapped[Optional[str]] = mapped_column(String(100))
+    startgeld_infos: Mapped[Optional[str]] = mapped_column(String(100))
+    kaution_infos: Mapped[Optional[str]] = mapped_column(String(100))
+    uebernachtung: Mapped[Optional[str]] = mapped_column(String(100))
+    physio: Mapped[Optional[str]] = mapped_column(String(100))
+    livestream: Mapped[Optional[str]] = mapped_column(String(100))
+    einschreibung: Mapped[Optional[str]] = mapped_column(String(100))
+    trikots: Mapped[Optional[str]] = mapped_column(String(100))
+    spielort: Mapped[Optional[str]] = mapped_column(String(100))
+    akkreditierungen: Mapped[Optional[str]] = mapped_column(String(100))
+    autoanreise: Mapped[Optional[str]] = mapped_column(String(100))
+    parkmöglichkeiten: Mapped[Optional[str]] = mapped_column(String(100))
+    bahnanreise: Mapped[Optional[str]] = mapped_column(String(100))
+    trainingsmöglichkeiten: Mapped[Optional[str]] = mapped_column(String(100))
+    tickets: Mapped[Optional[str]] = mapped_column(String(100))
+    zeitplan: Mapped[Optional[str]] = mapped_column(String(100))
 
 
     
@@ -235,56 +249,13 @@ class TournamentMatch(Base):
     start_time: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
-class TournamentGBT(Base):
-    __tablename__ = "tournaments_gbt"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    external_id: Mapped[str] = mapped_column(String, nullable=False, unique=True)
 
 
-    # Grundinformationen
-    name: Mapped[str] = mapped_column(String(200), nullable=False)   
-    datum_von: Mapped[Optional[date]] = mapped_column(Date)        
-    datum_bis: Mapped[Optional[date]] = mapped_column(Date)        
-    gender: Mapped[Optional[str]] = mapped_column(String(20))        
-    typ: Mapped[Optional[str]] = mapped_column(String(100))
-    ort: Mapped[Optional[str]] = mapped_column(String(100))
-    ausrichter: Mapped[Optional[str]] = mapped_column(String(100))
-    gelaende: Mapped[Optional[str]] = mapped_column(String(100))
-    ranglisteneingang: Mapped[Optional[date]] = mapped_column(Date)        
-    meldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
-    ummeldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
-    abmeldeschluss: Mapped[Optional[str]] = mapped_column(String(50))
 
-    # Zahlenangaben
-    gemeldete_mannschaften: Mapped[Optional[int]] = mapped_column(Integer)
-    anzahl_teams_hauptfeld: Mapped[Optional[int]] = mapped_column(Integer)
-    anzahl_teams_qualifikation: Mapped[Optional[int]] = mapped_column(Integer)
-    anzahl_teams_hauptfeld_aus_qualifikation: Mapped[Optional[int]] = mapped_column(Integer)
-    zulassungsreihenfolge: Mapped[Optional[str]] = mapped_column(Text)
-    preisgeld: Mapped[Optional[str]] = mapped_column(Text)            
-    startgeld: Mapped[Optional[str]] = mapped_column(Text)
-    kaution: Mapped[Optional[str]] = mapped_column(Text)
+    
+         
 
-    #Infos
-    sportorganisatorische_leitung: Mapped[Optional[str]] = mapped_column(String(100))
-    teilnehmer: Mapped[Optional[str]] = mapped_column(String(100))
-    preisgeld_infos: Mapped[Optional[str]] = mapped_column(String(100))
-    ausrichter: Mapped[Optional[str]] = mapped_column(String(100))
-    startgeld_infos: Mapped[Optional[str]] = mapped_column(String(100))
-    kaution_infos: Mapped[Optional[str]] = mapped_column(String(100))
-    uebernachtung: Mapped[Optional[str]] = mapped_column(String(100))
-    physio: Mapped[Optional[str]] = mapped_column(String(100))
-    livestream: Mapped[Optional[str]] = mapped_column(String(100))
-    einschreibung: Mapped[Optional[str]] = mapped_column(String(100))
-    trikots: Mapped[Optional[str]] = mapped_column(String(100))
-    spielort: Mapped[Optional[str]] = mapped_column(String(100))
-    akkreditierungen: Mapped[Optional[str]] = mapped_column(String(100))
-    autoanreise: Mapped[Optional[str]] = mapped_column(String(100))
-    parkmöglichkeiten: Mapped[Optional[str]] = mapped_column(String(100))
-    bahnanreise: Mapped[Optional[str]] = mapped_column(String(100))
-    trainingsmöglichkeiten: Mapped[Optional[str]] = mapped_column(String(100))
-    tickets: Mapped[Optional[str]] = mapped_column(String(100))
-    zeitplan: Mapped[Optional[str]] = mapped_column(String(100))
+    
 
+    
     

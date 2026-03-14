@@ -4,7 +4,6 @@ import { Form, Link, useLoaderData, useSearchParams } from "@remix-run/react";
 import { div } from "framer-motion/client";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import SingleGenderToggle from "~/components/toggleGender";
 import TurNavigation from "~/components/turnavigation";
 import { formatDate } from "~/utils/date";
 import { TournamentVVB } from "./types";
@@ -20,8 +19,8 @@ type Tournament = {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const res = await fetch(`http://localhost:8000/vvb`);
-  const data: TournamentVVB[] = await res.json(); // ← jetzt ist es ein Array
+  const res = await fetch(`http://localhost:8000/landesverband`);
+  const data: TournamentVVB[] = await res.json();
 
   let tournaments = data;
 
@@ -36,10 +35,10 @@ export default function TurPage() {
   const today = new Date();
   console.log(tournaments);
   const futureTournaments = tournaments.filter(
-    (t) => new Date(t.starttermin) >= today,
+    (t) => new Date(t.datum_von) >= today,
   );
   const pastTournaments = tournaments.filter(
-    (t) => new Date(t.starttermin) < today,
+    (t) => new Date(t.datum_von) < today,
   );
   const [showPast, setShowPast] = useState(false);
   const [showFuture, setShowFuture] = useState(true);
@@ -132,6 +131,7 @@ export default function TurPage() {
             </button>
           </div>
         </Form>
+
         <button
           onClick={() => setShowPast(!showPast)}
           className="mt-4 px-4 py-2 rounded-lg"
@@ -167,7 +167,7 @@ export default function TurPage() {
                         {t.kategorie}
                       </span>
                       <span className="text-sm font-semibold">
-                        {formatDate(t.starttermin)}
+                        {formatDate(t.datum_von)}
                       </span>
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
@@ -227,7 +227,7 @@ export default function TurPage() {
                         {t.kategorie}
                       </span>
                       <span className="text-sm font-semibold">
-                        {formatDate(t.starttermin)}
+                        {formatDate(t.datum_von)}
                       </span>
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
