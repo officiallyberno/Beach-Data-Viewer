@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import SingleGenderToggle from "~/components/toggleGender";
 import TurNavigation from "~/components/turnavigation";
 import { formatDate } from "~/utils/date";
+import { TournamentVVB } from "./types";
 
 type Tournament = {
   id: number;
@@ -19,27 +20,10 @@ type Tournament = {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-
-  const q = url.searchParams.get("q")?.toLowerCase() ?? "";
-  const query = url.searchParams.toString();
-
-  const res = await fetch(`http://localhost:8000/tournaments?${query}`);
-  const data: Tournament[] = await res.json(); // ← jetzt ist es ein Array
+  const res = await fetch(`http://localhost:8000/vvb`);
+  const data: TournamentVVB[] = await res.json(); // ← jetzt ist es ein Array
 
   let tournaments = data;
-  // nur zukünftige Turniere
-
-  // Suchfunktion
-  if (q) {
-    tournaments = tournaments.filter(
-      (t) =>
-        t.ort.toLowerCase().includes(q) ||
-        t.veranstalter.toLowerCase().includes(q) ||
-        t.start_datum.includes(q) ||
-        (t.end_datum && t.end_datum.includes(q))
-    );
-  }
 
   return { tournaments };
 }
@@ -50,11 +34,12 @@ export default function TurPage() {
   const [params] = useSearchParams();
 
   const today = new Date();
+  console.log(tournaments);
   const futureTournaments = tournaments.filter(
-    (t) => new Date(t.start_datum) >= today
+    (t) => new Date(t.starttermin) >= today,
   );
   const pastTournaments = tournaments.filter(
-    (t) => new Date(t.start_datum) < today
+    (t) => new Date(t.starttermin) < today,
   );
   const [showPast, setShowPast] = useState(false);
   const [showFuture, setShowFuture] = useState(true);
@@ -182,22 +167,22 @@ export default function TurPage() {
                         {t.kategorie}
                       </span>
                       <span className="text-sm font-semibold">
-                        {formatDate(t.start_datum)}
+                        {formatDate(t.starttermin)}
                       </span>
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          t.geschlecht === "Männer"
+                          t.gender === "Männer"
                             ? "bg-blue-500/20 text-blue-300"
-                            : t.geschlecht === "Frauen"
+                            : t.gender === "Frauen"
                             ? "bg-pink-500/20 text-pink-300"
                             : "bg-gray-600/40 text-gray-300"
                         }`}
                       >
-                        {t.geschlecht}
+                        {t.gender}
                       </span>
                     </div>
                     <h2 className="text-lg font-semibold text-gray-100 mb-1">
-                      {t.veranstalter}
+                      {t.ausrichter}
                     </h2>
                     <p className="text-sm text-gray-400 mb-2">{t.ort}</p>
                   </Link>
@@ -242,22 +227,22 @@ export default function TurPage() {
                         {t.kategorie}
                       </span>
                       <span className="text-sm font-semibold">
-                        {formatDate(t.start_datum)}
+                        {formatDate(t.starttermin)}
                       </span>
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          t.geschlecht === "Männer"
+                          t.gender === "Männer"
                             ? "bg-blue-500/20 text-blue-300"
-                            : t.geschlecht === "Frauen"
+                            : t.gender === "Frauen"
                             ? "bg-pink-500/20 text-pink-300"
                             : "bg-gray-600/40 text-gray-300"
                         }`}
                       >
-                        {t.geschlecht}
+                        {t.gender}
                       </span>
                     </div>
                     <h2 className="text-lg font-semibold text-gray-100 mb-1">
-                      {t.veranstalter}
+                      {t.ausrichter}
                     </h2>
                     <p className="text-sm text-gray-400 mb-2">{t.ort}</p>
                   </Link>
