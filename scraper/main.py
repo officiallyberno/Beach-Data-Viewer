@@ -9,20 +9,20 @@ CONCURRENCY = 8  # max. gleichzeitige Scrapes
 
 async def main():
     await scrape_tur_dvv()
-    #await scrape_tur_lv()
-    #await scrape_tur_vvb()
+    await scrape_tur_lv()
+    await scrape_tur_vvb()
     
-    # players = await scrape_rankings()
+    players = await scrape_rankings()
 
-    # sem = asyncio.Semaphore(CONCURRENCY)
+    sem = asyncio.Semaphore(CONCURRENCY)
 
-    # async def sem_task(pid: int, gender:str):
-    #     async with sem:               # Limit der gleichzeitigen Jobs
-    #         await scrape_player(pid, gender )
+    async def sem_task(pid: int, gender:str):
+        async with sem:               # Limit der gleichzeitigen Jobs
+            await scrape_player(pid, gender )
 
-    # tasks = [sem_task(p["id"],p["gender"]) 
-    #          for p in players]
-    # await asyncio.gather(*tasks)      # ALLE parallel starten
+    tasks = [sem_task(p["id"],p["gender"]) 
+             for p in players]
+    await asyncio.gather(*tasks)      # ALLE parallel starten
 
 if __name__ == "__main__":
     asyncio.run(main())

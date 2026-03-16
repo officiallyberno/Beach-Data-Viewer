@@ -5,9 +5,9 @@ export default function TurNavigation() {
   const location = useLocation();
 
   const links = [
+    { label: "GBT", path: "/tournaments/gbt", color: "bg-pink-500" },
     { label: "DVV", path: "/tournaments/dvv", color: "bg-yellow-500" },
     { label: "VVB", path: "/tournaments/vvb", color: "bg-red-500" },
-    { label: "GBT", path: "/tournaments/gbt", color: "bg-pink-500" },
     // ToDo:
     // { label: "VMV", path: "/tournaments/vmv", color: "bg-green-500" },
     // { label: "SAVV", path: "/tournaments/savv", color: "bg-yellow-500" },

@@ -46,7 +46,7 @@ export default function TournamentDetail() {
   const [activeTab, setActiveTab] = useState("details");
 
   const dateMarks = [
-    { label: "Datum", value: formatDateTime(tournament.starttermin) },
+    { label: "Datum", value: formatDateTime(tournament.datum_von) },
 
     { label: "Meldeschluss", value: formatDateTime(tournament.meldeschluss) },
     {
@@ -117,7 +117,7 @@ export default function TournamentDetail() {
   const now = new Date();
   const zulassungstermin = new Date(tournament.zulassungstermin);
   const setzungstermin = new Date(tournament.termin_technical_meeting);
-  const ende = new Date(tournament.starttermin);
+  const ende = new Date(tournament.datum_von);
 
   const isZulassungFinal = now >= zulassungstermin;
   const isSetzungFinal = now >= setzungstermin;
@@ -164,14 +164,14 @@ export default function TournamentDetail() {
       {/* Inhalt je nach Tab */}
       <div className="mt-4">
         {activeTab === "details" && (
-          <section className="bg-gray-800/60 border border-gray-700 rounded-2xl p-6 shadow-md mb-16">
-            <h2 className="text-2xl font-semibold text-gray-100 mb-6 border-b border-gray-700 pb-2">
+          <section className="p-6 mb-16">
+            <h2 className="text-2xl font-semibold mb-6 border-b pb-2">
               Turnierdetails
             </h2>
 
             <div className="grid grid-rows-3 gap-10">
               <div className="row-span-1">
-                <div className="grid grid-cols-1 sm:grid-cols-1 gap-x-10 gap-y-4 text-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-1 gap-x-10 gap-y-4">
                   {dateMarks
                     .filter(
                       (d) => d.value && d.value !== "null" && d.value !== "",

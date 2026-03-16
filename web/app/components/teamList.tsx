@@ -54,13 +54,13 @@ export default function TeamList({
 
   return (
     <section className="mb-8">
-      <h2 className="text-2xl font-bold text-gray-100 mb-4">{title}</h2>
+      <h2 className="text-2xl font-bold mb-4">{title}</h2>
 
-      <ul className="divide-y divide-gray-700 border border-gray-700 rounded-xl overflow-hidden">
+      <ul className="">
         {sortedTeams.map((team, i) => (
           <li
             key={team.id}
-            className="flex justify-between items-center px-5 py-4 bg-gray-800/70 hover:bg-gray-700/70 transition-all duration-150"
+            className="flex justify-between items-center p-4 border-b border-gray-700"
           >
             <div>
               <div className="flex items-center space-x-3">

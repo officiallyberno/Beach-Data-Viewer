@@ -1,6 +1,7 @@
 import { Link } from "@remix-run/react";
 import { TournamentVVB } from "~/routes/types";
 import { formatDate } from "~/utils/date";
+import { tur_name } from "~/utils/tur_details";
 
 interface TournamentGridProps {
   tournaments: TournamentVVB[];
@@ -16,7 +17,7 @@ export default function TournamentGrid({
       className="
         grid 
         grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4
-        gap-2
+        gap-4
       "
     >
       {tournaments.map((t) => (
@@ -24,13 +25,9 @@ export default function TournamentGrid({
           key={t.id}
           className="
             bg-gray-800/80
-            backdrop-blur-sm
             rounded-2xl
-            shadow-md
-            hover:shadow-lg
             transition
             duration-200
-            border border-gray-700
             overflow-hidden
           "
         >
@@ -40,28 +37,32 @@ export default function TournamentGrid({
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-semibold text-blue-400">
-                {t.kategorie}
+                {tur_name(t.kategorie)}
               </span>
               <span className="text-sm font-semibold">
                 {formatDate(t.datum_von)}
               </span>
               <span
                 className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  t.gender === "männlich"
-                    ? "bg-blue-500/20 text-blue-300"
-                    : t.gender === "weiblich"
-                    ? "bg-pink-500/20 text-pink-300"
+                  t.gender === "männlich" || t.gender === "Männer"
+                    ? "bg-green-500/20 text-greens-300"
+                    : t.gender === "weiblich" || t.gender === "Frauen"
+                    ? "bg-red-500/20 text-red-300"
                     : "bg-gray-600/40 text-gray-300"
                 }`}
               >
-                {t.gender}
+                {t.gender === "männlich" || t.gender === "Männer"
+                  ? "M"
+                  : t.gender === "weiblich" || t.gender === "Frauen"
+                  ? "W"
+                  : "-"}
               </span>
             </div>
 
             <h2 className="text-lg font-semibold text-gray-100 mb-1">
-              {t.name}
+              {t.ort}
             </h2>
-            <p className="text-sm text-gray-400 mb-2">{t.ort}</p>
+            <p className="text-sm text-gray-400 mb-2">{t.name}</p>
 
             <div className="text-sm text-gray-300 space-y-1">
               <p>
