@@ -70,6 +70,19 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
                 continue
             if len (tds) >1:
               name = tds[1].get_text(strip=True)
+              href=  tds[1].select_one("a").get("href")
+
+              start_index = href.find("beachTeamId=")
+              if start_index != -1:
+                start_index += len("beachTeamId=")
+                rest = href[start_index:]
+    
+                end_index = rest.find("&")
+              if end_index != -1:
+                 beach_team_id = rest[:end_index]
+              else:
+                 beach_team_id = rest
+              
             else:
               name = "Nicht bekannt"
             if len (tds) >2:
@@ -95,11 +108,11 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
             team = TournamentTeam(
                 tournament_id=int(tournament_id),
                 mannschaftsname=name,
-                mannschafts_id=22,
                 verein=verein,
                 anmeldedatum=anmeldedatum,
                 status="Angemeldet",
-                is_placeholder= is_placeholder
+                is_placeholder= is_placeholder, 
+                external_mannschafts_id = int (beach_team_id)
             )
 
             db.add(team)
@@ -144,7 +157,7 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
         for field in int_fields:
           value = scraped_data.get(field)
           if isinstance(value, int):
-            pass  # schon korrekt
+            pass 
           elif isinstance(value, str):
             try:
               scraped_data[field] = int(value)

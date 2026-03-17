@@ -179,7 +179,7 @@ class TournamentTeam(Base):
 
     tournament: Mapped["TournamentVVB"] = relationship(back_populates="teams")
 
-    mannschafts_id: Mapped[Optional[int]] = mapped_column(Integer, unique=False) 
+    external_mannschafts_id: Mapped[Optional[int]] = mapped_column(Integer)
     
     # Anmeldung
     mannschaftsname: Mapped[str] = mapped_column(String(100))
@@ -201,6 +201,15 @@ class TournamentTeam(Base):
     platzierung: Mapped[Optional[int]] = mapped_column(Integer)
     punkte: Mapped[Optional[str]] = mapped_column(String(100))
     punkte_pro_spieler: Mapped[Optional[str]] = mapped_column(String(200))  # z. B. "Spieler1: 100, Spieler2: 90"
+
+
+    name_1: Mapped[str] = mapped_column(String(100))
+    vorname_1: Mapped[str] = mapped_column(String(100))
+    dvv_nummer_1:  Mapped[Optional[int]] = mapped_column(Integer)
+    name_2: Mapped[str] = mapped_column(String(100))
+    vorname_2: Mapped[str] = mapped_column(String(100))
+    dvv_nummer_2:  Mapped[Optional[int]] = mapped_column(Integer)
+
 
     # Optional Beziehungen zu Spielern
     # players: Mapped[List["Player"]] = relationship(...)
