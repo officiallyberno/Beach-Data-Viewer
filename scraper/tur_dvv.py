@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 from datetime import datetime
 
 from scraper.dateUtils import parse_date_range
+from scraper.tur_dvv_details import scrape_details_dvv
 
 
 
@@ -61,6 +62,14 @@ async def scrape_tur_dvv():
                 )
             
                 await session.execute(stmt)
+                await scrape_details_dvv(browser, session, external_id, "tur-show") #Allgemein
+                await scrape_details_dvv(browser, session, external_id, "tur-info") #Informationen
+                await scrape_details_dvv(browser, session, external_id, "tur-ml") #Meldeliste
+                await scrape_details_dvv(browser, session, external_id, "tur-zu") #Zulassung
+                await scrape_details_dvv(browser, session, external_id, "courtplan") #Courtplan
+                await scrape_details_dvv(browser, session, external_id, "tur-sl") #Setzliste HF (für Quali: &feld=2)
+                await scrape_details_dvv(browser, session, external_id, "tur-sp") #Spiele HF (für Quali: &feld=2)
+                await scrape_details_dvv(browser, session, external_id, "tur-er") #Ergebnisse HF (für Quali: &feld=2)
             await session.commit()
     await browser.close()
 

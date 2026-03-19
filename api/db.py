@@ -203,11 +203,11 @@ class TournamentTeam(Base):
     punkte_pro_spieler: Mapped[Optional[str]] = mapped_column(String(200))  # z. B. "Spieler1: 100, Spieler2: 90"
 
 
-    name_1: Mapped[str] = mapped_column(String(100))
-    vorname_1: Mapped[str] = mapped_column(String(100))
+    name_1: Mapped[Optional[str]] = mapped_column(String(100))
+    vorname_1: Mapped[Optional[str]] = mapped_column(String(100))
     dvv_nummer_1:  Mapped[Optional[int]] = mapped_column(Integer)
-    name_2: Mapped[str] = mapped_column(String(100))
-    vorname_2: Mapped[str] = mapped_column(String(100))
+    name_2: Mapped[Optional[str]] = mapped_column(String(100))
+    vorname_2: Mapped[Optional[str]] = mapped_column(String(100))
     dvv_nummer_2:  Mapped[Optional[int]] = mapped_column(Integer)
 
 

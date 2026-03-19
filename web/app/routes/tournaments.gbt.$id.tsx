@@ -1,9 +1,8 @@
-// app/routes/tournaments/$id.tsx (Remix Beispiel)
-
-import { useLoaderData, useParams } from "@remix-run/react";
 import { json, LoaderFunctionArgs } from "@remix-run/node";
+import { TournamentVVB } from "./types";
 import { useState } from "react";
-import { TournamentVVB } from "~/routes/types";
+import { useLoaderData } from "@remix-run/react";
+import { div } from "framer-motion/client";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const id = params.id;
@@ -25,14 +24,13 @@ const tabs = [
   { key: "spiele", label: "Spiele" },
   { key: "platzierungen", label: "Platzierungen" },
 ];
+
 export default function TournamentDetail() {
   const { tournament } = useLoaderData<{ tournament: TournamentVVB }>();
   const [activeTab, setActiveTab] = useState("details");
+
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">{tournament.ort}</h1>
-
-      {/* Tabs-Navigation */}
       <div className="flex flex-wrap gap-2 mb-6">
         {tabs.map((t) => (
           <button
@@ -49,8 +47,7 @@ export default function TournamentDetail() {
           </button>
         ))}
       </div>
-
-      {/* Inhalt je nach Tab */}
+      {/* DetailSeiten */}
       <div className="mt-4">
         {activeTab === "details" && (
           <section>

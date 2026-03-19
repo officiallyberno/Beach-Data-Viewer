@@ -6,6 +6,7 @@ import TournamentGrid from "~/components/turgrid";
 import TurNavigation from "~/components/turnavigation";
 import { formatDate } from "~/utils/date";
 import { TournamentVVB } from "./types";
+import TournamentTable from "~/components/turtable";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -43,6 +44,7 @@ export default function TurPageVVB() {
 
   const [showPast, setShowPast] = useState(false);
   const [showFuture, setShowFuture] = useState(true);
+  const [activeView, setActiveView] = useState(true);
 
   return (
     <div>
@@ -91,7 +93,26 @@ export default function TurPageVVB() {
             </button>
           </div>
         </Form>
-
+        <div className="flex justify-end">
+          <button
+            onClick={() => setActiveView(!activeView)}
+            className="mt-4 px-4 py-2 rounded-lg"
+          >
+            {activeView ? (
+              <div className="flex flex-row bg-gray-800 rounded-lg p-1">
+                <h2 className="font-bold bg-slate-500 p-1 rounded-md"> Grid</h2>
+                <h2 className="font-bold ml-2 p-1">Table</h2>
+              </div>
+            ) : (
+              <div className="flex flex-row bg-gray-800 rounded-lg p-1">
+                <h2 className="font-bold p-1"> Grid</h2>
+                <h2 className="font-bold ml-2 bg-slate-500 p-1 rounded-md">
+                  Table
+                </h2>
+              </div>
+            )}
+          </button>
+        </div>
         <div className="">
           <div className="place-content-end">
             <button
@@ -114,8 +135,12 @@ export default function TurPageVVB() {
                 </div>
               )}
             </button>
-            {showPast && (
+
+            {showPast && activeView && (
               <TournamentGrid tournaments={pastTournaments} basePath="vvb" />
+            )}
+            {showPast && !activeView && (
+              <TournamentTable tournaments={pastTournaments} basePath="vvb" />
             )}
 
             <button
@@ -137,8 +162,11 @@ export default function TurPageVVB() {
           </div>
         </div>
 
-        {showFuture && (
+        {showFuture && activeView && (
           <TournamentGrid tournaments={futureTournaments} basePath="vvb" />
+        )}
+        {showFuture && !activeView && (
+          <TournamentTable tournaments={futureTournaments} basePath="vvb" />
         )}
       </div>
     </div>

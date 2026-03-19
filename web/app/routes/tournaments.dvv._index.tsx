@@ -9,16 +9,6 @@ import { formatDate } from "~/utils/date";
 import { TournamentVVB } from "./types";
 import TournamentGrid from "~/components/turgrid";
 
-type Tournament = {
-  id: number;
-  start_datum: string;
-  end_datum: string;
-  ort: string;
-  geschlecht: string;
-  kategorie: string;
-  veranstalter: string;
-};
-
 export async function loader({ request }: LoaderFunctionArgs) {
   const res = await fetch(`http://localhost:8000/landesverband`);
   const data: TournamentVVB[] = await res.json();

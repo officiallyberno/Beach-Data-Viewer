@@ -41,9 +41,7 @@ async def insert_teams(db: AsyncSession, tournament_id: int, registrations: list
 
 
 async def scrape_registrations(browser, db: AsyncSession, external_tournament_id: int, kind: string):
-    """
-    Scrapt die Registrations eines Turniers und speichert sie direkt in die API.
-    """
+
     url = (
         f"https://www.beachvolleybb.de/cms/home/beachtour/erwachsene/turniere.xhtml"
         f"?BeachTourneyComponent.view={kind}&BeachTourneyComponent.tourneyId={external_tournament_id}#samsCmsComponent_49930769"
