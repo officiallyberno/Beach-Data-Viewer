@@ -62,18 +62,25 @@ export default function TournamentGrid({
             <h2 className="text-lg font-semibold text-gray-100 mb-1">
               {t.ort}
             </h2>
-            <p className="text-sm text-gray-400 mb-2">{t.name}</p>
+
+            {t.ausrichter != "Volleyball-Verband Berlin" && (
+              <p className="text-sm text-gray-400 mb-2">{t.ausrichter}</p>
+            )}
 
             <div className="text-sm text-gray-300 space-y-1">
-              <p>
-                <strong className="text-gray-200">Meldeschluss:</strong>{" "}
-                {formatDate(t.meldeschluss) ?? "k. A."}
-              </p>
-              <p>
-                <strong className="text-gray-200">Teams:</strong>{" "}
-                {t.gemeldete_mannschaften ?? 0}/
-                {t.anzahl_teams_hauptfeld ?? "?"}
-              </p>
+              {t.meldeschluss != null && (
+                <p>
+                  <strong className="text-gray-200">Meldeschluss:</strong>{" "}
+                  {formatDate(t.meldeschluss) ?? "k. A."}
+                </p>
+              )}
+              {t.gemeldete_mannschaften != null &&
+                t.anzahl_teams_hauptfeld != null && (
+                  <p>
+                    <strong className="text-gray-200">Teams:</strong>{" "}
+                    {t.gemeldete_mannschaften}/{t.anzahl_teams_hauptfeld}
+                  </p>
+                )}
             </div>
           </Link>
         </li>

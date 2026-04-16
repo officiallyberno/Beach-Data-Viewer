@@ -1,5 +1,5 @@
 import { Team } from "~/routes/types";
-import { formatDate } from "~/utils/date";
+import { formatDate, formatDateTime } from "~/utils/date";
 import { formatDvvPoints } from "~/utils/formatDvvPoints";
 
 interface TeamListProps {
@@ -76,9 +76,9 @@ export default function TeamList({
               <p className="text-sm text-gray-400 ml-9">{team.verein}</p>
             </div>
 
-            <div className="text-sm text-gray-300">
+            <div className="text-xl font-semibold text-gray-100">
               {displayKey === "anmeldedatum" && (
-                <span>{formatDate(team.anmeldedatum)}</span>
+                <span>{formatDateTime(team.anmeldedatum)}</span>
               )}
               {displayKey === "dvv_punkte_zulassung" &&
                 team.punkte_zulassung !== null && (

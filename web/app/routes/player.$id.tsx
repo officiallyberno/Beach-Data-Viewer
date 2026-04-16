@@ -103,36 +103,41 @@ export default function PlayerSite() {
   const [showLegend, setShowLegend] = useState(false);
 
   return (
-    <div className="max-w-4xl p-6 mb-12">
-      <div className="flex flex-row justify-between mb-8">
+    <div className="p-6 mb-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         {/* Spielerinfos */}
         <div>
-          <div className="flex flex-row place-items-baseline">
+          <div className="flex items-center gap-3 flex-wrap">
             <Link
               to="/ranking_dvv"
-              className="text-white hover:bg-gray-700 mr-4 rounded-md p-1"
+              className="text-white hover:bg-gray-700 rounded-md p-1"
             >
               <ArrowBigLeft />
             </Link>
-            <h1 className="text-3xl font-bold mb-2">
+
+            <h1 className="text-2xl sm:text-3xl font-bold">
               {infos.first_name} {infos.last_name}
             </h1>
+
             <Link
               to={`https://beach.volleyball-verband.de/public/spieler.php?id=${infos.external_id}`}
               target="_blank"
-              className="ml-6 underline"
+              className="underline text-sm sm:text-base"
             >
-              {infos.external_id}➚
+              {infos.external_id} ➚
             </Link>
           </div>
-          <span className="ml-12"> {infos.club}</span>
+
+          <div className="text-gray-400 sm:ml-10">{infos.club}</div>
         </div>
-        <div className="flex flex-row">
-          <div className="p-1 mr-2 font-bold text-xl">Saison:</div>
+
+        {/* Saison */}
+        <div className="flex items-center gap-2">
+          <span className="font-bold">Saison:</span>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="border rounded-lg bg-black content-start h-1/2"
+            className="border rounded-lg bg-black px-2 py-1"
           >
             {years.map((year) => (
               <option key={year} value={year}>
@@ -142,24 +147,26 @@ export default function PlayerSite() {
           </select>
         </div>
       </div>
-      <div className="grid grid-row-3 mb-8">
-        {/* Rankings */}
-        <div className="font-extrabold text-xl">Rangliste</div>
-        <section className="border-t">
+      <div className="mb-10">
+        <h2 className="font-extrabold text-xl mb-2">Rangliste</h2>
+
+        <table className="w-full border-separate border-spacing-0 text-sm">
           <thead>
-            <tr className="border-t">
-              <th className="p-2 text-left">Datum</th>
-              <th className="p-2 text-left">Wertung</th>
-              <th className="p-2 text-left">Punkte</th>
-              <th className="p-2 text-left">Platz</th>
+            <tr>
+              <th className="p-2 text-left border-y border-l rounded-tl-lg rounded-bl-lg">
+                Datum
+              </th>
+              <th className="p-2 text-left border-y">Wertung</th>
+              <th className="p-2 text-left border-y">Punkte</th>
+              <th className="p-2 text-left border-y border-r rounded-tr-lg rounded-br-lg">
+                Platz
+              </th>
             </tr>
           </thead>
+
           <tbody>
             {rankingsByYear[selectedYear]?.map((r) => (
-              <tr
-                key={r.id}
-                className="border-b border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
+              <tr key={r.id} className="hover:bg-gray-700/50">
                 <td className="p-2">{formatDate(r.date)}</td>
                 <td className="p-2">{r.association}</td>
                 <td className="p-2">{r.points}</td>
@@ -167,55 +174,105 @@ export default function PlayerSite() {
               </tr>
             ))}
           </tbody>
-        </section>
+        </table>
       </div>
 
       {/* Ergebnisse */}
       <div className="mb-12">
-        <div className="font-extrabold text-xl">Ergebnisse</div>
-        <section className="border-t">
-          {hasResults ? (
-            <div>
+        <h2 className="font-extrabold text-xl mb-2">Ergebnisse</h2>
+
+        {hasResults ? (
+          <>
+            {/* 💻 Desktop Tabelle */}
+            <table className="hidden sm:table w-full border-separate border-spacing-0 text-sm">
               <thead>
-                <tr className="">
-                  <th className="p-2">Datum</th>
-                  <th className="p-2">Turnier</th>
-                  <th className="p-2">Ort</th>
-                  <th className="p-2">Partner</th>
-                  <th className="p-2">Platz</th>
-                  <th className="p-2">Punkte</th>
+                <tr>
+                  <th className="p-2 border-y border-l rounded-tl-lg rounded-bl-lg">
+                    Datum
+                  </th>
+                  <th className="p-2 border-y">Turnier</th>
+                  <th className="p-2 border-y">Ort</th>
+                  <th className="p-2 border-y">Partner</th>
+                  <th className="p-2 border-y">Platz</th>
+                  <th className="p-2 border-y border-r rounded-tr-lg rounded-br-lg">
+                    Punkte
+                  </th>
                 </tr>
               </thead>
 
               <tbody>
-                {resultsByYear[selectedYear]?.map((r) => {
-                  counter++;
-                  return (
-                    <tr key={r.id} className="border-b border-gray-300">
-                      <td className="p-2">{formatDate(r.date)}</td>
-                      <td className="p-2 max-w-xs">
-                        {tur_name(r.tournament_name)}
-                      </td>
-                      <td className="p-2">{r.location}</td>
-                      <td className="p-2">
-                        {tur_partner(r.partner.toString(), infos.last_name)}
-                      </td>
-                      <td className="p-2">{r.rank}</td>
-                      <td className="p-2">{r.points}</td>
-                      <td className="">{r.association}</td>
-                    </tr>
-                  );
-                })}
+                {resultsByYear[selectedYear]?.map((r) => (
+                  <tr
+                    key={r.id}
+                    onClick={() =>
+                      window.open(
+                        `https://beach.volleyball-verband.de/public/tur-er.php?id=${r.turnier_id}`,
+                        "_blank",
+                      )
+                    }
+                    className="cursor-pointer hover:bg-gray-700/50"
+                  >
+                    <td className="p-2">{formatDate(r.date)}</td>
+                    <td className="p-2">{tur_name(r.tournament_name)}</td>
+                    <td className="p-2">{r.location}</td>
+                    <td className="p-2">
+                      {tur_partner(r.partner.toString(), infos.last_name)}
+                    </td>
+                    <td className="p-2">{r.rank}</td>
+                    <td className="p-2 flex justify-between">
+                      <span>{r.points}</span>
+                      <span>{r.association}</span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
-              <div>Insgesamt: {counter}</div>
+            </table>
+
+            {/* 📱 Mobile Cards */}
+            <div className="sm:hidden space-y-3">
+              {resultsByYear[selectedYear]?.map((r) => (
+                <div
+                  key={r.id}
+                  onClick={() =>
+                    window.open(
+                      `https://beach.volleyball-verband.de/public/tur-er.php?id=${r.turnier_id}`,
+                      "_blank",
+                    )
+                  }
+                  className="p-3 rounded-lg bg-gray-800 cursor-pointer"
+                >
+                  <div className="flex justify-between">
+                    <span className="font-semibold">
+                      {tur_name(r.tournament_name)}
+                    </span>
+                    <span className="text-sm">Platz: {r.rank}</span>
+                  </div>
+
+                  <div className="text-sm text-gray-400">
+                    {formatDate(r.date)} • {r.location}
+                  </div>
+
+                  <div className="text-sm mt-1"></div>
+
+                  <div className="flex justify-between mt-2 text-sm">
+                    <span>
+                      {tur_partner(r.partner.toString(), infos.last_name)}
+                    </span>
+                    <span>
+                      {r.points} {r.association} Pkt.
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-          ) : (
-            <div className="">
-              Es wurden anscheinend (noch) keine Turniere in diesem Jahr
-              gespielt.
+
+            <div className="mt-2 text-sm text-gray-400">
+              Insgesamt: {resultsByYear[selectedYear]?.length}
             </div>
-          )}
-        </section>
+          </>
+        ) : (
+          <div>Keine Turniere gefunden.</div>
+        )}
       </div>
       <section>
         <button
@@ -236,35 +293,34 @@ export default function PlayerSite() {
         </button>
 
         {showLegend && (
-          <>
-            <div className="flex flex-grid gap-2 justify-between">
-              <div className="flex flex-col">
-                <div className="font-semibold">Internationale Wettbewerbe</div>
-                <div>Oympische Spiele</div>
-                <div>Weltmeisterschaft</div>
-                <div>Europameisterschaft</div>
-              </div>
-              <div className="flex flex-col">
-                <div className="font-semibold">Beach Pro Tour</div>
-                <div>Elite-16</div>
-                <div>Challenge</div>
-                <div>Future</div>
-              </div>
-              <div className="flex flex-col">
-                <div className="font-semibold">Nationale Turniere</div>
-                <div>Deutsche Meisterschaften</div>
-                <div>German Beach Tour</div>
-                <div>Rock the Beach</div>
-                <div>Deutsche Hochschulmeisterschaften</div>
-              </div>
-              <div className="flex flex-col">
-                <div className="font-semibold">Regionale Turniere</div>
-                <div>Premium</div>
-                <div>A+</div>
-                <div>A</div>
-              </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <div>
+              <div className="font-semibold">Internationale Turniere</div>
+              <div>Olympische Spiele</div>
+              <div>WM</div>
+              <div>EM</div>
             </div>
-          </>
+
+            <div>
+              <div className="font-semibold">Beach Pro Tour</div>
+              <div>Elite-16</div>
+              <div>Challenge</div>
+              <div>Future</div>
+            </div>
+
+            <div>
+              <div className="font-semibold">Nationale Turniere</div>
+              <div>DM</div>
+              <div>GBT</div>
+            </div>
+
+            <div>
+              <div className="font-semibold">Regionale Turniere</div>
+              <div>Premium</div>
+              <div>A+</div>
+              <div>A</div>
+            </div>
+          </div>
         )}
       </section>
     </div>

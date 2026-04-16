@@ -8,7 +8,7 @@ from scraper.tur_vvb import scrape_tur_vvb
 CONCURRENCY = 8  # max. gleichzeitige Scrapes
 
 async def main():
-    await scrape_tur_dvv()
+    
     await scrape_tur_lv()
     await scrape_tur_vvb()
     

@@ -1,5 +1,6 @@
 export type TournamentVVB = {
   id: number;
+  external_id: number;
   name: string;
   kategorie: string;
   datum_von: string;

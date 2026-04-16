@@ -184,7 +184,7 @@ class TournamentTeam(Base):
     # Anmeldung
     mannschaftsname: Mapped[str] = mapped_column(String(100))
     verein: Mapped[Optional[str]] = mapped_column(String(100))
-    anmeldedatum: Mapped[Optional[date]] = mapped_column(Date)
+    anmeldedatum: Mapped[Optional[datetime]] = mapped_column(DateTime) 
     status: Mapped[Optional[str]] = mapped_column(String(50))  
     doppelmeldung: Mapped[Optional[str]] = mapped_column(String(400))
     is_placeholder: Mapped[Optional[bool]]

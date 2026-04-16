@@ -133,6 +133,35 @@ export default function TournamentDetail() {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
+      <div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <Link
+            to="/tournaments/vvb"
+            className="text-white hover:bg-gray-700 rounded-md p-1"
+          >
+            <ArrowBigLeft />
+          </Link>
+
+          <h1 className="text-2xl sm:text-3xl font-bold">{tournament.ort}</h1>
+
+          <Link
+            to={`https://beach.volleyball-verband.de/public/tur-show.php?id=${tournament.external_id}`}
+            target="_blank"
+            className="underline text-sm sm:text-base"
+          >
+            {tournament.external_id} ➚
+          </Link>
+        </div>
+
+        <div className="text-gray-400 sm:ml-10">
+          {tournament.datum_von === tournament.datum_bis
+            ? formatDate(tournament.datum_von)
+            : `${formatDate(tournament.datum_von)} - ${formatDate(
+                tournament.datum_bis,
+              )}`}
+        </div>
+      </div>
+
       <h1 className="text-3xl font-bold mb-4">{tournament.name}</h1>
 
       {/* Tabs-Navigation */}

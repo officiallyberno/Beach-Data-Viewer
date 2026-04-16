@@ -65,30 +65,29 @@ export default function CleanRanking() {
     <div className="max-w-3xl mx-auto mb-10 p-6">
       <h1 className="text-3xl font-bold mb-4">Rangliste 2026</h1>
 
-      <Form method="get" className="flex items-center gap-4 mb-6">
+      <Form method="get" className="flex flex-col sm:flex-row gap-3 mb-6">
         <input
           type="text"
           name="q"
-          placeholder="Suchen nach Name, Verein oder Punkte..."
+          placeholder="Suchen..."
           defaultValue={params.get("q") ?? ""}
-          className="border p-2 rounded flex-1"
+          className="border p-2 rounded w-full"
         />
-        <label className="sr-only" htmlFor="gender-select">
-          Geschlecht
-        </label>
+
         <select
           id="gender-select"
           name="gender"
           value={gender}
           onChange={(e) => setGender(e.currentTarget.value)}
-          className="bg-gray-800 border border-gray-700 px-3 py-2 rounded"
+          className="bg-gray-800 border border-gray-700 px-3 py-2 rounded w-full sm:w-auto"
         >
           <option value="Männer">Männer</option>
           <option value="Frauen">Frauen</option>
         </select>
+
         <button
           type="submit"
-          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
+          className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
         >
           Suchen
         </button>
@@ -99,25 +98,29 @@ export default function CleanRanking() {
           {players.map((r) => (
             <li
               key={r.id}
-              className="flex justify-between items-center pr-5 hover:bg-gray-700/70 transition-all duration-150 hover:cursor-pointer"
+              className="flex justify-between items-center p-1 sm:pr-5 hover:bg-gray-700/70 transition-all duration-150 cursor-pointer"
               onClick={() => navigate(`/player/${r.player.external_id}`)}
             >
-              <div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-400 font-semibold w-6 text-right">
-                    {r.rank}.
-                  </span>
+              {/* Linke Seite */}
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-400 font-semibold w-6 text-right">
+                  {r.rank}.
+                </span>
 
+                {/* Name + Verein */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
                   <span className="font-semibold text-gray-100">
                     {r.player.first_name} {r.player.last_name}
                   </span>
-                  <p className="text-sm text-gray-400 ml-9">{r.player.club}</p>
+
+                  <span className="text-sm text-gray-400 sm:ml-4">
+                    {r.player.club}
+                  </span>
                 </div>
               </div>
 
-              <div className="text-sm text-gray-300">
-                <span>{r.points}</span>
-              </div>
+              {/* Punkte */}
+              <div className="text-sm text-gray-300">{r.points}</div>
             </li>
           ))}
         </ul>

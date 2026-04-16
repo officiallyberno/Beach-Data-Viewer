@@ -8,6 +8,8 @@ import TurNavigation from "~/components/turnavigation";
 import { formatDate } from "~/utils/date";
 import { TournamentVVB } from "./types";
 import TournamentGrid from "~/components/turgrid";
+import ToggleTurView from "~/components/toggleTurView";
+import TournamentTable from "~/components/turtable";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const res = await fetch(`http://localhost:8000/landesverband`);
@@ -33,6 +35,7 @@ export default function TurPage() {
   );
   const [showPast, setShowPast] = useState(false);
   const [showFuture, setShowFuture] = useState(true);
+  const [activeView, setActiveView] = useState(true);
 
   return (
     <div>
@@ -123,6 +126,8 @@ export default function TurPage() {
           </div>
         </Form>
 
+        <ToggleTurView setActiveView={setActiveView} activeView={activeView} />
+
         <button
           onClick={() => setShowPast(!showPast)}
           className="mt-4 px-4 py-2 rounded-lg"
@@ -141,8 +146,11 @@ export default function TurPage() {
         </button>
 
         {/* Vergangene Turniere */}
-        {showPast && (
+        {showPast && activeView && (
           <TournamentGrid tournaments={pastTournaments} basePath="vvb" />
+        )}
+        {showPast && !activeView && (
+          <TournamentTable tournaments={pastTournaments} basePath="vvb" />
         )}
 
         <button
@@ -163,8 +171,11 @@ export default function TurPage() {
         </button>
 
         {/* Aktuelle Turniere */}
-        {showFuture && (
-          <TournamentGrid tournaments={futureTournaments} basePath="vvb" />
+        {showFuture && activeView && (
+          <TournamentGrid tournaments={futureTournaments} basePath="dvv" />
+        )}
+        {showFuture && !activeView && (
+          <TournamentTable tournaments={futureTournaments} basePath="dvv" />
         )}
       </div>
     </div>

@@ -90,13 +90,10 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
             is_placeholder = (name.strip().lower() == "keine daten vorhanden") 
             # Fallback: falls es weniger als 4 <td> gibt, benutze heute als Datum
             if len(tds) > 3:
-              anmeldedatum_raw = tds[3].get_text(strip=True).split(",")[0]
-              try:
-                anmeldedatum = datetime.strptime(anmeldedatum_raw, "%d.%m.%Y").date()
-              except ValueError:
-                anmeldedatum = datetime.today().date()
-            else:
-              anmeldedatum = datetime.today().date()
+              anmeldedatum_raw = tds[3].get_text(strip=True)
+
+              anmeldedatum = datetime.strptime(anmeldedatum_raw, "%d.%m.%Y, %H:%M")
+
             result = await db.execute(
               select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id)
             )
