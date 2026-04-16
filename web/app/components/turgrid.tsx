@@ -63,9 +63,10 @@ export default function TournamentGrid({
               {t.ort}
             </h2>
 
-            {t.ausrichter != "Volleyball-Verband Berlin" && (
-              <p className="text-sm text-gray-400 mb-2">{t.ausrichter}</p>
-            )}
+            {t.ausrichter != "Volleyball-Verband Berlin" &&
+              t.ausrichter != "Brandenburgischer Volleyball Verband" && (
+                <p className="text-sm text-gray-400 mb-2">{t.ausrichter}</p>
+              )}
 
             <div className="text-sm text-gray-300 space-y-1">
               {t.meldeschluss != null && (

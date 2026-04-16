@@ -22,6 +22,12 @@ export function tur_name(tournament_name: string) {
     return "Urlaubsguru Beach Cup";
   if (tournament_name == "Deutsche Beach-Volleyball Tour\\ROCK the BEACH")
     return "Rock the Beach";
+  if (tournament_name == "VVB | Jugendbeachserie AK1") return "AK 1 | Jugend";
+  if (tournament_name == "VVB | Jugendbeachserie AK2") return "AK 2 | Jugend";
+  if (tournament_name == "BBVV | Landesmeisterschaften Jugend")
+    return "LM | BBVV | Jugend";
+  if (tournament_name == "VVB | Landesmeisterschaften Jugend")
+    return "LM | VVB | Jugend";
   else return tournament_name;
 }
 export function tur_partner(tur_team: string, tur_player: string) {

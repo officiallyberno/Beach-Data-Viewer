@@ -1,5 +1,6 @@
 
 from datetime import date, datetime
+import re
 
 
 DATETIME_FORMATS = [
@@ -47,31 +48,37 @@ def parse_date(text: str) -> date | None:
         return None
     
 
+DATE_FORMAT = "%d.%m.%Y"
+
 def parse_date_range(raw_datum: str):
-    raw_datum = raw_datum.strip()
+    if not raw_datum:
+        return None, None
+
+
+    parts = re.split(r"\s*[-–]\s*", raw_datum, maxsplit=1)
+
     try:
-        if "-" in raw_datum:
-            start_part, end_part = raw_datum.split("-")
-            start_part = start_part.strip().rstrip(".")
-            end_part = end_part.strip()
+        if len(parts) == 2:
+            start_str, end_str = parts
 
-            if len(end_part) == 10:  # dd.mm.yyyy
-                year = end_part[-4:]
-            elif len(end_part) == 5:  # dd.mm
-                year = str(datetime.today().year)
-                end_part += f".{year}"
-            else:
-                year = str(datetime.today().year)
+            # year fix für unvollständige daten
+            current_year = str(datetime.today().year)
 
-            if len(start_part) == 5:
-                start_part += f".{year}"
+            if len(start_str.strip()) == 5:  # dd.mm
+                start_str = f"{start_str}.{current_year}"
 
-            start_date = datetime.strptime(start_part, "%d.%m.%Y").date()
-            end_date = datetime.strptime(end_part, "%d.%m.%Y").date()
+            if len(end_str.strip()) == 5:
+                end_str = f"{end_str}.{current_year}"
+
+            start_date = datetime.strptime(start_str.strip(), DATE_FORMAT).date()
+            end_date = datetime.strptime(end_str.strip(), DATE_FORMAT).date()
+
         else:
-            start_date = datetime.strptime(raw_datum, "%d.%m.%Y").date()
+            start_date = datetime.strptime(parts[0].strip(), DATE_FORMAT).date()
             end_date = start_date
+
         return start_date, end_date
+
     except Exception as e:
         print(f"⚠ Fehler beim Parsen von '{raw_datum}': {e}")
         return None, None

@@ -37,7 +37,7 @@ async def scrape_tur_vvb():
                 tds = r.select("td")
                 if not tds or len(tds) < 5:
                     continue
-                cat, name, start_meldung, ort, geschlecht, teams, anmeldung= [c.get_text(strip=True) for c in tds[:7]] 
+                cat, name, geschlecht = [c.get_text(strip=True) for c in tds[:3]] 
 
                 # Detail-Link extrahieren
                 detail_url = None

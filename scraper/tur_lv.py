@@ -47,7 +47,7 @@ async def scrape_tur_lv():
                 external_id = href.split("id=")[1]
 
                 start_datum, end_datum = parse_date_range(datum)
-                print(f"{external_id} | {start_datum} | {end_datum} | {verband} | {kategorie} | {ort} | {geschlecht}")
+                #print(f"{external_id} | {start_datum} | {end_datum} | {verband} | {kategorie} | {ort} | {geschlecht}")
                 stmt = insert(TournamentVVB).values(
                     datum_von= start_datum,
                     datum_bis = end_datum,

@@ -9,7 +9,7 @@ CONCURRENCY = 8  # max. gleichzeitige Scrapes
 
 async def main():
     
-    await scrape_tur_lv()
+    #await scrape_tur_lv()
     await scrape_tur_vvb()
     
     players = await scrape_rankings()

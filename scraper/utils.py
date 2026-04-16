@@ -4,40 +4,13 @@ from datetime import date, datetime
 import re
 import string
 from bs4 import BeautifulSoup
-from scraper.dateUtils import normalize_date_field, normalize_datetime_field
+from scraper.dateUtils import normalize_date_field, normalize_datetime_field, parse_date_range
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from api.db import TournamentTeam, TournamentVVB
 
 
-async def insert_teams(db: AsyncSession, tournament_id: int, registrations: list[dict]):
-    for reg in registrations:
-        # Pflichtfeld Mannschaftsname prüfen, sonst überspringen
-        name = reg.get("Mannschaftsname") or reg.get("team") or "Unbekannt"
-        if not name.strip():
-            continue
 
-        # Optional: Datum parsen
-        anmeldedatum_raw = reg.get("angemeldet am")
-        anmeldedatum = None
-        if anmeldedatum_raw:
-            try:
-                anmeldedatum = datetime.strptime(anmeldedatum_raw, "%d.%m.%Y").date()
-            except ValueError:
-                anmeldedatum = None  # wenn das Datum ungültig ist
-
-        team = TournamentTeam(
-            tournament_id=tournament_id,
-            mannschaftsname=name,
-            mannschafts_id=reg.get("teamid"),
-            verein=reg.get("Verein"),
-            anmeldedatum=anmeldedatum,
-            status="angemeldet"  # default-Status, kann man anpassen
-        )
-
-        db.add(team)
-
-    await db.commit()
 
 
 async def scrape_registrations(browser, db: AsyncSession, external_tournament_id: int, kind: string):
@@ -61,45 +34,42 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
         return  # keine Tabelle gefunden → nichts einfügen
     
     if(kind == "registrations"):
+        result = await db.execute(select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id))
+        tournament_id = result.scalar_one_or_none()
   
         for tr in table.select("tbody tr"):
             tds = tr.select("td")
             if not tds:
                 continue
             if len (tds) >1:
-              name = tds[1].get_text(strip=True)
-              href=  tds[1].select_one("a").get("href")
-
+              name = tds[1].get_text(strip=True) # Name
+              
+              href=  tds[1].select_one("a").get("href") # TeamID
               start_index = href.find("beachTeamId=")
               if start_index != -1:
                 start_index += len("beachTeamId=")
                 rest = href[start_index:]
-    
                 end_index = rest.find("&")
               if end_index != -1:
                  beach_team_id = rest[:end_index]
               else:
                  beach_team_id = rest
-              
             else:
               name = "Nicht bekannt"
-            if len (tds) >2:
+              beach_team_id= -1
+              anmeldedatum= None
+            
+            if len (tds) >2: # Verein
               verein = tds[2].get_text(strip=True)
             else:
-              verein= "Unbekannt"
+              verein= "Unbekannt" 
             is_placeholder = (name.strip().lower() == "keine daten vorhanden") 
-            # Fallback: falls es weniger als 4 <td> gibt, benutze heute als Datum
-            if len(tds) > 3:
+            
+            if len(tds) > 3: # Anmeldezeitpunkt
               anmeldedatum_raw = tds[3].get_text(strip=True)
-
               anmeldedatum = datetime.strptime(anmeldedatum_raw, "%d.%m.%Y, %H:%M")
 
-            result = await db.execute(
-              select(TournamentVVB.id).where(TournamentVVB.external_id == external_tournament_id)
-            )
-            tournament_id = result.scalar_one_or_none()
-
-
+  
             team = TournamentTeam(
                 tournament_id=int(tournament_id),
                 mannschaftsname=name,
@@ -111,8 +81,48 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
             )
 
             db.add(team)
-    
+        await db.commit()
+
+        
     elif kind in ("summary", "details"):
+      scraped_data = {
+        "name": None,
+        "turnierhierarchie": None,
+        "ort": None,
+        "datum": None,
+        "gender": None,
+        "ausrichter": None,
+        "contact": None,
+        "altersklasse": None,
+
+        "registration_deadline": None,
+        "einschreibetermin": None,
+        "start_hauptfeld": None,
+        "start_endspiele": None,
+        "termin_technical_meeting": None,
+        "ort_technical_meeting": None,
+        "zulassungstermin": None,
+        "meldeschluss":None,
+
+        "gemeldete_mannschaften": None,
+        "anzahl_teams_hauptfeld": None,
+        "anzahl_teams_qualifikation": None,
+        "wildcards_hauptfeld": None,
+        "courts_hauptfeld": None,
+
+        "zulassungsreihenfolge": None,
+        "preisgeld": None,
+        "startgeld": None,
+        "kaution": None,
+        "oeffentliche_informationen":None,
+        "sachpreise":None,
+        "anmerkungen":None,
+        "turniermodus":None,
+        }
+      
+      result = await db.execute(select(TournamentVVB).where(TournamentVVB.external_id == external_tournament_id))
+      tournament = result.scalar_one_or_none()
+
       for tr in table.select("tbody tr"):
         tds = tr.select("td")
         
@@ -121,7 +131,7 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
         
         raw_key = tds[0].get_text(strip=True).rstrip(":")
         raw_value = tds[1].get_text(strip=True)
-        print(raw_key + raw_value)
+        #print(raw_key + raw_value)
 
         if not raw_key:
           continue
@@ -132,7 +142,7 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
           db_field = ATTRIBUTE_MAP[normalized_key]
           scraped_data[db_field] = raw_value
 
-        date_fields = ["datum_von", "zulassungstermin" ]  
+        date_fields = ["zulassungstermin" ]  
         datetime_fields=["meldeschluss","start_hauptfeld", "termin_technical_meeting", "start_endspiele", "einschreibetermin"]
         
         for field in date_fields:
@@ -140,6 +150,12 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
           scraped_data.get(field),
           field_name=field
           )
+        
+        datum_raw = scraped_data.get("datum")
+        if datum_raw:
+          datum_von, datum_bis = parse_date_range(datum_raw)
+          scraped_data["datum_von"] = datum_von
+          scraped_data["datum_bis"] = datum_bis
 
         for field in datetime_fields:
           scraped_data[field] = normalize_datetime_field(
@@ -167,23 +183,12 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
       if span:
         scraped_data["oeffentliche_informationen"] = span.get_text(strip=True)
       
-        
-
-      result = await db.execute(select(TournamentVVB).where(TournamentVVB.external_id == external_tournament_id))
-      tournament = result.scalar_one_or_none()
-
-      if tournament:
-          for field, value in scraped_data.items():
-              if value is not None:
+      
+      for field, value in scraped_data.items():
+          if value is not None:
                   setattr(tournament, field, value)
                   print(hasattr(tournament, field), field)
-      else:
-          tournament = TournamentVVB(
-              external_id=external_tournament_id,
-              **scraped_data
-          )
-          db.add(tournament)
-          await db.commit()
+      
       
     elif(kind=="admissions"):
        for tr in table.select("tbody tr"):
@@ -319,15 +324,13 @@ async def upsert_team(db, tournament_id, name, **kwargs):
 
 
 
-
-
 ATTRIBUTE_MAP = {
    
     # Basis
     "turnier": "name",
     "turnierhierarchie": "turnierhierarchie",
     "ort": "ort",
-    "datum": "datum_von",
+    "datum": "datum",
     "geschlecht": "gender",
     "ausrichter": "ausrichter",
     "kontakt": "kontakt",
@@ -360,40 +363,7 @@ ATTRIBUTE_MAP = {
 }
 
 
-scraped_data = {
-    "name": None,
-    "turnierhierarchie": None,
-    "ort": None,
-    "datum_von": None,
-    "gender": None,
-    "ausrichter": None,
-    "contact": None,
-    "altersklasse": None,
 
-    "registration_deadline": None,
-    "einschreibetermin": None,
-    "start_hauptfeld": None,
-    "start_endspiele": None,
-    "termin_technical_meeting": None,
-    "ort_technical_meeting": None,
-    "zulassungstermin": None,
-    "meldeschluss":None,
-
-    "gemeldete_mannschaften": None,
-    "anzahl_teams_hauptfeld": None,
-    "anzahl_teams_qualifikation": None,
-    "wildcards_hauptfeld": None,
-    "courts_hauptfeld": None,
-
-    "zulassungsreihenfolge": None,
-    "preisgeld": None,
-    "startgeld": None,
-    "kaution": None,
-    "oeffentliche_informationen":None,
-    "sachpreise":None,
-    "anmerkungen":None,
-    "turniermodus":None,
-}
 
 def parse_zulassungspunkte(text: str) -> tuple[int, int]:
     lv_match = re.search(r"LV.*?:\s*(\d+)", text)
