@@ -42,16 +42,6 @@ export type TournamentVVB = {
   platzierungen?: any[];
 };
 
-// export type Tournament = {
-//   id: number;
-//   start_datum: string;
-//   end_datum: string;
-//   ort: string;
-//   geschlecht: string;
-//   kategorie: string;
-//   veranstalter: string;
-// };
-
 export type Tournament2 = {
   id: number;
   name: string;
@@ -83,6 +73,7 @@ export type Team = {
   setzung_reihenfolge: number;
   dvv_punkte_zulassung: number;
   lv_punkte_zulassung: number;
+  external_mannschafts_id: number;
 };
 
 export type RankingClean = {

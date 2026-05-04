@@ -145,7 +145,7 @@ export default function TournamentDetail() {
           <h1 className="text-2xl sm:text-3xl font-bold">{tournament.ort}</h1>
 
           <Link
-            to={`https://beach.volleyball-verband.de/public/tur-show.php?id=${tournament.external_id}`}
+            to={`https://www.beachvolleybb.de/cms/home/beachtour/erwachsene/turniere.xhtml?BeachTourneyComponent.view=summary&BeachTourneyComponent.tourneyId=${tournament.external_id}#samsCmsComponent_49930769`}
             target="_blank"
             className="underline text-sm sm:text-base"
           >
@@ -153,7 +153,7 @@ export default function TournamentDetail() {
           </Link>
         </div>
 
-        <div className="text-gray-400 sm:ml-10">
+        <div className="text-gray-400 ml-10">
           {tournament.datum_von === tournament.datum_bis
             ? formatDate(tournament.datum_von)
             : `${formatDate(tournament.datum_von)} - ${formatDate(
@@ -162,16 +162,10 @@ export default function TournamentDetail() {
         </div>
       </div>
 
-      <h1 className="text-3xl font-bold mb-4">{tournament.name}</h1>
+      <h1 className="text-3xl font-bold my-4">{tournament.name}</h1>
 
       {/* Tabs-Navigation */}
       <div className="flex flex-wrap gap-2 mb-6">
-        <Link
-          to="/tournaments/vvb"
-          className="px-4 py-2 rounded-lg transition bg-gray-100 text-gray-700 hover:bg-gray-200"
-        >
-          <ArrowBigLeft />
-        </Link>
         {tabs
           .filter((t) => t.published)
           .map((t) => (
@@ -285,28 +279,9 @@ export default function TournamentDetail() {
           <div>
             <TeamList
               teams={teams}
-              title={
-                isZulassungFinal
-                  ? "Zulassung - Reihenfolge nach DVV"
-                  : `Zulassung: ${formatDate(
-                      tournament.zulassungstermin,
-                    )} - - Reihenfolge nach DVV`
-              }
+              title={"Zulassung"}
               activeTab={activeTab}
-              displayKey="dvv_punkte_zulassung"
-            />
-
-            <TeamList
-              teams={teams}
-              title={
-                isZulassungFinal
-                  ? "Zulassung - Reihenfolge nach Landesverbandspunkten"
-                  : `Zulassung: ${formatDate(
-                      tournament.zulassungstermin,
-                    )}- Reihenfolge nach Landesverbandspunkten`
-              }
-              activeTab={activeTab}
-              displayKey="lv_punkte_zulassung"
+              displayKey="punkte_zulassung"
             />
           </div>
         )}
@@ -333,22 +308,13 @@ export default function TournamentDetail() {
           </section>
         )}
 
-        {activeTab === "platzierungen" && teams[0] === null && (
+        {activeTab === "platzierungen" && (
           <TeamList
             teams={teams}
             title="Platzierungen"
             activeTab={activeTab}
             displayKey="punkte_pro_spieler"
           />
-        )}
-        {activeTab === "platzierungen" && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-100 mb-4">
-              Plazierungen
-            </h2>
-
-            <div>Es sind noch keine Platzierungen vorhanden!</div>
-          </div>
         )}
       </div>
     </div>

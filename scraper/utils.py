@@ -131,7 +131,6 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
         
         raw_key = tds[0].get_text(strip=True).rstrip(":")
         raw_value = tds[1].get_text(strip=True)
-        #print(raw_key + raw_value)
 
         if not raw_key:
           continue
@@ -187,7 +186,6 @@ async def scrape_registrations(browser, db: AsyncSession, external_tournament_id
       for field, value in scraped_data.items():
           if value is not None:
                   setattr(tournament, field, value)
-                  print(hasattr(tournament, field), field)
       
       
     elif(kind=="admissions"):
