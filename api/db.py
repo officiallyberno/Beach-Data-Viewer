@@ -182,8 +182,8 @@ class TournamentTeam(Base):
     external_mannschafts_id: Mapped[Optional[int]] = mapped_column(Integer)
     
     # Anmeldung
-    mannschaftsname: Mapped[str] = mapped_column(String(100))
-    verein: Mapped[Optional[str]] = mapped_column(String(100))
+    mannschaftsname: Mapped[str] = mapped_column(String(200))
+    verein: Mapped[Optional[str]] = mapped_column(String(200))
     anmeldedatum: Mapped[Optional[datetime]] = mapped_column(DateTime) 
     status: Mapped[Optional[str]] = mapped_column(String(50))  
     doppelmeldung: Mapped[Optional[str]] = mapped_column(String(400))
@@ -200,7 +200,7 @@ class TournamentTeam(Base):
     #Platzierungen
     platzierung: Mapped[Optional[int]] = mapped_column(Integer)
     punkte: Mapped[Optional[str]] = mapped_column(String(100))
-    punkte_pro_spieler: Mapped[Optional[str]] = mapped_column(String(200))  # z. B. "Spieler1: 100, Spieler2: 90"
+    punkte_pro_spieler: Mapped[Optional[str]] = mapped_column(String(200)) 
 
 
     name_1: Mapped[Optional[str]] = mapped_column(String(100))
