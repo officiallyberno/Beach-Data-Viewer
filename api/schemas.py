@@ -48,6 +48,7 @@ class RankingCleanSchema(BaseModel):
     date: date
     rank: str
     points: str
+    player:PlayerSchema
 
     model_config = {"from_attributes": True}
 

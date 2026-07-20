@@ -12,7 +12,7 @@ from scraper.tur_dvv_details import scrape_details_dvv
 
 
 
-URL = "https://beach.volleyball-verband.de/public/tur.php?kat=1&bytyp=0&saison=25#"
+URL = "https://beach.volleyball-verband.de/public/tur.php?kat=1&bytyp=0&saison=26#"
 
 
 
@@ -42,6 +42,8 @@ async def scrape_tur_dvv():
                 ort = tds[2].get_text(strip=True)
                 geschlecht = tds[3].get_text(strip=True)
                 teams = tds[4].get_text(strip=True)
+                if teams == "k.a.":
+                    teams = -1
 
                 geschlecht_tag = tds[3].select_one("a")
                 href = geschlecht_tag["href"]
@@ -62,14 +64,14 @@ async def scrape_tur_dvv():
                 )
             
                 await session.execute(stmt)
-                await scrape_details_dvv(browser, session, external_id, "tur-show") #Allgemein
-                await scrape_details_dvv(browser, session, external_id, "tur-info") #Informationen
-                await scrape_details_dvv(browser, session, external_id, "tur-ml") #Meldeliste
-                await scrape_details_dvv(browser, session, external_id, "tur-zu") #Zulassung
-                await scrape_details_dvv(browser, session, external_id, "courtplan") #Courtplan
-                await scrape_details_dvv(browser, session, external_id, "tur-sl") #Setzliste HF (für Quali: &feld=2)
-                await scrape_details_dvv(browser, session, external_id, "tur-sp") #Spiele HF (für Quali: &feld=2)
-                await scrape_details_dvv(browser, session, external_id, "tur-er") #Ergebnisse HF (für Quali: &feld=2)
+                # await scrape_details_dvv(browser, session, external_id, "tur-show") #Allgemein
+                # await scrape_details_dvv(browser, session, external_id, "tur-info") #Informationen
+                # await scrape_details_dvv(browser, session, external_id, "tur-ml") #Meldeliste
+                # await scrape_details_dvv(browser, session, external_id, "tur-zu") #Zulassung
+                # await scrape_details_dvv(browser, session, external_id, "courtplan") #Courtplan
+                # await scrape_details_dvv(browser, session, external_id, "tur-sl") #Setzliste HF (für Quali: &feld=2)
+                # await scrape_details_dvv(browser, session, external_id, "tur-sp") #Spiele HF (für Quali: &feld=2)
+                # await scrape_details_dvv(browser, session, external_id, "tur-er") #Ergebnisse HF (für Quali: &feld=2)
             await session.commit()
     await browser.close()
 

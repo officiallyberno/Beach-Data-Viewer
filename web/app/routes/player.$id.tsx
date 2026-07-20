@@ -1,143 +1,184 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import { div } from "framer-motion/client";
-import { ArrowBigLeft, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ArrowBigLeft,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { formatDate } from "~/utils/date";
 import { tur_name, tur_partner } from "~/utils/tur_details";
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
-  const id = params.id;
-
-  const res = await fetch(`http://localhost:8000/players/${id}/rankings`);
-  const res1 = await fetch(`http://localhost:8000/players/${id}`);
-  const res2 = await fetch(`http://localhost:8000/players/${id}/results`);
-
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Response(txt, { status: res.status });
-  }
-  if (!res1.ok) {
-    const txt = await res1.text();
-    throw new Response(txt, { status: res1.status });
-  }
-  if (!res2.ok) {
-    const txt = await res2.text();
-    throw new Response(txt, { status: res2.status });
-  }
-
-  const ranks: PlayerRankingsHistory[] = await res.json();
-  const infos: PlayerInfos = await res1.json();
-  const results: PlayerResultsHistory[] = await res2.json();
-
-  return json({ ranks, infos, results });
-};
+// ---------------------------------------------------------------------------
+// Typen
+// ---------------------------------------------------------------------------
 
 export type PlayerRankingsHistory = {
+  id: number;
   player_id: number;
   year: string;
   date: string;
   points: string;
   association: string;
-  id: number;
   rank: number;
 };
+
 export type PlayerResultsHistory = {
-  date: string;
   id: number;
-  tournament_name: string;
-  rank: string;
-  association: string;
-  turnier_id: number;
   player_id: number;
-  partner: number;
-  location: number;
-  points: number;
+  turnier_id: string;
+  date: string;
+  partner: string; // war fälschlicherweise number
+  tournament_name: string;
+  location: string; // war fälschlicherweise number
+  rank: string;
+  points: string;
+  association: string;
 };
+
 export type PlayerInfos = {
+  id: number;
   external_id: number;
   first_name: string;
-  club: string;
-  id: string;
   last_name: string;
-  licence_number: number;
+  club: string | null;
+  license_number: string | null;
+  gender: string;
 };
 
+// ---------------------------------------------------------------------------
+// Loader  — zwei parallele Calls statt drei sequenzieller
+// ---------------------------------------------------------------------------
+
+export const loader = async ({ params }: LoaderFunctionArgs) => {
+  const id = params.id;
+  const base = process.env.API_URL ?? "http://localhost:8000";
+
+  const [profileRes, resultsRes] = await Promise.all([
+    fetch(`${base}/players/${id}/profile`),
+    fetch(`${base}/players/${id}/results`),
+  ]);
+
+  if (!profileRes.ok)
+    throw new Response(await profileRes.text(), { status: profileRes.status });
+  if (!resultsRes.ok)
+    throw new Response(await resultsRes.text(), { status: resultsRes.status });
+
+  const profile: PlayerInfos & { rankings: PlayerRankingsHistory[] } =
+    await profileRes.json();
+  const results: PlayerResultsHistory[] = await resultsRes.json();
+
+  return json({ profile, results });
+};
+
+// ---------------------------------------------------------------------------
+// Hilfsfunktion
+// ---------------------------------------------------------------------------
+
+function parsePoints(p: string): number {
+  const n = parseFloat(p?.replace(",", ".") ?? "0");
+  return isNaN(n) ? 0 : n;
+}
+
+// ---------------------------------------------------------------------------
+// Komponente
+// ---------------------------------------------------------------------------
+
 export default function PlayerSite() {
-  const { ranks, infos, results } = useLoaderData<typeof loader>();
-  let counter = 0;
-  const rankingsByYear = useMemo(() => {
-    return ranks.reduce<Record<string, PlayerRankingsHistory[]>>(
-      (acc, rank) => {
-        if (!acc[rank.year]) {
-          acc[rank.year] = [];
-        }
-        acc[rank.year].push(rank);
-        return acc;
-      },
-      {},
+  const { profile, results } = useLoaderData<typeof loader>();
+  const { rankings, ...infos } = profile;
+
+  const years = useMemo(() => {
+    const fromRankings = rankings.map((r) => Number(r.year));
+    const fromResults = results.map((r) => new Date(r.date).getFullYear());
+    return [...new Set([...fromRankings, ...fromResults])].sort(
+      (a, b) => b - a,
     );
-  }, [ranks]);
+  }, [rankings, results]);
 
-  const getYearFromDate = (date: string) => new Date(date).getFullYear();
-  const years = Object.keys(rankingsByYear)
-    .map(Number)
-    .sort((a, b) => b - a);
-  const [selectedYear, setSelectedYear] = useState<number>(years[0]);
-
-  const resultsByYear = useMemo(() => {
-    return results.reduce<Record<number, PlayerResultsHistory[]>>(
-      (acc, result) => {
-        const year = getYearFromDate(result.date);
-
-        acc[year] ??= [];
-        acc[year].push(result);
-        return acc;
-      },
-      {},
-    );
-  }, [results]);
-  const resultsForYear = resultsByYear[selectedYear] ?? [];
-  const hasResults = resultsForYear.length > 0;
-
+  const [selectedYear, setSelectedYear] = useState<number>(
+    years[0] ?? new Date().getFullYear(),
+  );
   const [showLegend, setShowLegend] = useState(false);
 
+  const rankingsForYear = useMemo(
+    () =>
+      rankings
+        .filter((r) => Number(r.year) === selectedYear)
+        .sort((a, b) => a.rank - b.rank),
+    [rankings, selectedYear],
+  );
+
+  const resultsForYear = useMemo(
+    () =>
+      results
+        .filter((r) => new Date(r.date).getFullYear() === selectedYear)
+        .sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        ),
+    [results, selectedYear],
+  );
+
+  const totalPoints = useMemo(
+    () => resultsForYear.reduce((sum, r) => sum + parsePoints(r.points), 0),
+    [resultsForYear],
+  );
+
   return (
-    <div className="p-6 mb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        {/* Spielerinfos */}
+    <div className="max-w-4xl mx-auto px-4 py-6 mb-12">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
-          <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap mb-1">
             <Link
               to="/ranking_dvv"
-              className="text-white hover:bg-gray-700 rounded-md p-1"
+              className="text-gray-400 hover:text-white hover:bg-gray-700 rounded-md p-1 transition"
+              aria-label="Zurück zur Rangliste"
             >
-              <ArrowBigLeft />
+              <ArrowBigLeft size={20} />
             </Link>
-
             <h1 className="text-2xl sm:text-3xl font-bold">
               {infos.first_name} {infos.last_name}
             </h1>
-
-            <Link
-              to={`https://beach.volleyball-verband.de/public/spieler.php?id=${infos.external_id}`}
+            <a
+              href={`https://beach.volleyball-verband.de/public/spieler.php?id=${infos.external_id}`}
               target="_blank"
-              className="underline text-sm sm:text-base"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-400 hover:text-blue-300 text-sm"
             >
-              {infos.external_id} ➚
-            </Link>
+              DVV-Profil <ExternalLink size={13} />
+            </a>
           </div>
-
-          <div className="text-gray-400 sm:ml-10">{infos.club}</div>
+          <div className="flex items-center gap-3 ml-9 text-gray-400 text-sm">
+            {infos.club && <span>{infos.club}</span>}
+            {infos.gender && (
+              <span
+                className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                  infos.gender === "Männer" || infos.gender === "männlich"
+                    ? "bg-blue-500/20 text-blue-300"
+                    : "bg-pink-500/20 text-pink-300"
+                }`}
+              >
+                {infos.gender}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Saison */}
-        <div className="flex items-center gap-2">
-          <span className="font-bold">Saison:</span>
+        {/* Saison-Auswahl */}
+        <div className="flex items-center gap-2 ml-9 sm:ml-0">
+          <label
+            htmlFor="year-select"
+            className="font-semibold text-sm text-gray-400"
+          >
+            Saison
+          </label>
           <select
+            id="year-select"
             value={selectedYear}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
-            className="border rounded-lg bg-black px-2 py-1"
+            className="border border-gray-700 rounded-lg bg-gray-800 px-3 py-1.5 text-sm"
           >
             {years.map((year) => (
               <option key={year} value={year}>
@@ -147,61 +188,68 @@ export default function PlayerSite() {
           </select>
         </div>
       </div>
-      <div className="mb-10">
-        <h2 className="font-extrabold text-xl mb-2">Rangliste</h2>
 
-        <table className="w-full border-separate border-spacing-0 text-sm">
-          <thead>
-            <tr>
-              <th className="p-2 text-left border-y border-l rounded-tl-lg rounded-bl-lg">
-                Datum
-              </th>
-              <th className="p-2 text-left border-y">Wertung</th>
-              <th className="p-2 text-left border-y">Punkte</th>
-              <th className="p-2 text-left border-y border-r rounded-tr-lg rounded-br-lg">
-                Platz
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {rankingsByYear[selectedYear]?.map((r) => (
-              <tr key={r.id} className="hover:bg-gray-700/50">
-                <td className="p-2">{formatDate(r.date)}</td>
-                <td className="p-2">{r.association}</td>
-                <td className="p-2">{r.points}</td>
-                <td className="p-2">{r.rank}</td>
+      {/* Rangliste */}
+      <section className="mb-10">
+        <h2 className="font-bold text-xl mb-3">Rangliste</h2>
+        {rankingsForYear.length > 0 ? (
+          <table className="w-full text-sm border-separate border-spacing-0">
+            <thead>
+              <tr className="text-gray-400 text-left">
+                <th className="p-2 border-y border-l rounded-tl-lg">Datum</th>
+                <th className="p-2 border-y">Wertung</th>
+                <th className="p-2 border-y">Punkte</th>
+                <th className="p-2 border-y border-r rounded-tr-lg">Platz</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {rankingsForYear.map((r) => (
+                <tr key={r.id} className="hover:bg-gray-700/50 transition">
+                  <td className="p-2 text-gray-300">{formatDate(r.date)}</td>
+                  <td className="p-2 text-gray-300">{r.association}</td>
+                  <td className="p-2 font-semibold">{r.points}</td>
+                  <td className="p-2 font-semibold text-blue-400">{r.rank}.</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-gray-500 italic text-sm">
+            Keine Ranglisteneinträge für {selectedYear}.
+          </p>
+        )}
+      </section>
 
       {/* Ergebnisse */}
-      <div className="mb-12">
-        <h2 className="font-extrabold text-xl mb-2">Ergebnisse</h2>
+      <section className="mb-12">
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="font-bold text-xl">Ergebnisse</h2>
+          {resultsForYear.length > 0 && (
+            <span className="text-sm text-gray-400">
+              {resultsForYear.length} Turniere ·{" "}
+              {totalPoints.toLocaleString("de-DE")} Pkte. gesamt
+            </span>
+          )}
+        </div>
 
-        {hasResults ? (
+        {resultsForYear.length > 0 ? (
           <>
-            {/* 💻 Desktop Tabelle */}
-            <table className="hidden sm:table w-full border-separate border-spacing-0 text-sm">
+            {/* Desktop */}
+            <table className="hidden sm:table w-full text-sm border-separate border-spacing-0">
               <thead>
-                <tr>
-                  <th className="p-2 border-y border-l rounded-tl-lg rounded-bl-lg">
-                    Datum
-                  </th>
+                <tr className="text-gray-400 text-left">
+                  <th className="p-2 border-y border-l rounded-tl-lg">Datum</th>
                   <th className="p-2 border-y">Turnier</th>
                   <th className="p-2 border-y">Ort</th>
                   <th className="p-2 border-y">Partner</th>
-                  <th className="p-2 border-y">Platz</th>
-                  <th className="p-2 border-y border-r rounded-tr-lg rounded-br-lg">
+                  <th className="p-2 border-y text-center">Platz</th>
+                  <th className="p-2 border-y border-r rounded-tr-lg text-right">
                     Punkte
                   </th>
                 </tr>
               </thead>
-
               <tbody>
-                {resultsByYear[selectedYear]?.map((r) => (
+                {resultsForYear.map((r) => (
                   <tr
                     key={r.id}
                     onClick={() =>
@@ -210,27 +258,31 @@ export default function PlayerSite() {
                         "_blank",
                       )
                     }
-                    className="cursor-pointer hover:bg-gray-700/50"
+                    className="cursor-pointer hover:bg-gray-700/50 transition"
                   >
-                    <td className="p-2">{formatDate(r.date)}</td>
-                    <td className="p-2">{tur_name(r.tournament_name)}</td>
-                    <td className="p-2">{r.location}</td>
-                    <td className="p-2">
-                      {tur_partner(r.partner.toString(), infos.last_name)}
+                    <td className="p-2 text-gray-400">{formatDate(r.date)}</td>
+                    <td className="p-2 font-medium">
+                      {tur_name(r.tournament_name)}
                     </td>
-                    <td className="p-2">{r.rank}</td>
-                    <td className="p-2 flex justify-between">
-                      <span>{r.points}</span>
-                      <span>{r.association}</span>
+                    <td className="p-2 text-gray-300">{r.location}</td>
+                    <td className="p-2 text-gray-300">
+                      {tur_partner(r.partner, infos.last_name)}
+                    </td>
+                    <td className="p-2 text-center font-semibold">{r.rank}</td>
+                    <td className="p-2 text-right">
+                      <span className="font-semibold">{r.points}</span>
+                      <span className="ml-1 text-xs text-gray-400">
+                        {r.association}
+                      </span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* 📱 Mobile Cards */}
-            <div className="sm:hidden space-y-3">
-              {resultsByYear[selectedYear]?.map((r) => (
+            {/* Mobile Cards */}
+            <div className="sm:hidden space-y-2">
+              {resultsForYear.map((r) => (
                 <div
                   key={r.id}
                   onClick={() =>
@@ -239,86 +291,72 @@ export default function PlayerSite() {
                       "_blank",
                     )
                   }
-                  className="p-3 rounded-lg bg-gray-800 cursor-pointer"
+                  className="p-3 rounded-xl bg-gray-800 cursor-pointer active:bg-gray-700 transition"
                 >
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-start">
                     <span className="font-semibold">
                       {tur_name(r.tournament_name)}
                     </span>
-                    <span className="text-sm">Platz: {r.rank}</span>
+                    <span className="text-sm font-bold text-blue-400">
+                      Platz {r.rank}
+                    </span>
                   </div>
-
-                  <div className="text-sm text-gray-400">
-                    {formatDate(r.date)} • {r.location}
+                  <div className="text-sm text-gray-400 mt-0.5">
+                    {formatDate(r.date)} · {r.location}
                   </div>
-
-                  <div className="text-sm mt-1"></div>
-
                   <div className="flex justify-between mt-2 text-sm">
-                    <span>
-                      {tur_partner(r.partner.toString(), infos.last_name)}
+                    <span className="text-gray-300">
+                      {tur_partner(r.partner, infos.last_name)}
                     </span>
                     <span>
-                      {r.points} {r.association} Pkt.
+                      <span className="font-semibold">{r.points}</span>{" "}
+                      <span className="text-gray-400 text-xs">
+                        {r.association}
+                      </span>
                     </span>
                   </div>
                 </div>
               ))}
             </div>
-
-            <div className="mt-2 text-sm text-gray-400">
-              Insgesamt: {resultsByYear[selectedYear]?.length}
-            </div>
           </>
         ) : (
-          <div>Keine Turniere gefunden.</div>
+          <p className="text-gray-500 italic text-sm">
+            Keine Ergebnisse für {selectedYear}.
+          </p>
         )}
-      </div>
+      </section>
+
+      {/* Legende */}
       <section>
         <button
-          onClick={() => setShowLegend(!showLegend)}
-          className="rounded mb-2"
+          onClick={() => setShowLegend((v) => !v)}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition rounded mb-2"
         >
-          {showLegend ? (
-            <div className="flex flex-row ">
-              <h2 className="mr-2">Legende</h2>
-              <ChevronDown />
-            </div>
-          ) : (
-            <div className="flex flex-row">
-              <h2 className="mr-2">Legende</h2>
-              <ChevronUp />
-            </div>
-          )}
+          <span>Legende</span>
+          {showLegend ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
 
         {showLegend && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-300 p-4 bg-gray-800/60 rounded-xl">
             <div>
-              <div className="font-semibold">Internationale Turniere</div>
+              <div className="font-semibold text-white mb-1">International</div>
               <div>Olympische Spiele</div>
-              <div>WM</div>
-              <div>EM</div>
+              <div>WM · EM</div>
             </div>
-
             <div>
-              <div className="font-semibold">Beach Pro Tour</div>
+              <div className="font-semibold text-white mb-1">
+                Beach Pro Tour
+              </div>
               <div>Elite-16</div>
-              <div>Challenge</div>
-              <div>Future</div>
+              <div>Challenge · Future</div>
             </div>
-
             <div>
-              <div className="font-semibold">Nationale Turniere</div>
-              <div>DM</div>
-              <div>GBT</div>
+              <div className="font-semibold text-white mb-1">National</div>
+              <div>DM · GBT</div>
             </div>
-
             <div>
-              <div className="font-semibold">Regionale Turniere</div>
-              <div>Premium</div>
-              <div>A+</div>
-              <div>A</div>
+              <div className="font-semibold text-white mb-1">Regional</div>
+              <div>Premium · A+ · A</div>
             </div>
           </div>
         )}

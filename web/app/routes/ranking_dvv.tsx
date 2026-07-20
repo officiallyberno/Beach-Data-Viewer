@@ -17,13 +17,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const gender = url.searchParams.get("gender") ?? "Männer";
   const q = url.searchParams.get("q")?.toLowerCase() ?? "";
   const association = "DVV";
-  const year = "2026";
+  const year = "2025";
 
-  const res = await fetch(
-    `http://localhost:8000/rank/${association}/${year}?gender=${encodeURIComponent(
-      gender,
-    )}&q=${encodeURIComponent(q)}`,
-  );
+  const res = await fetch(`http://localhost:8000/rank/${association}/${year}`);
 
   if (!res.ok) {
     const txt = await res.text();

@@ -22,6 +22,16 @@ export default function TurPageGbt() {
   const { tournaments } = useLoaderData<typeof loader>();
   console.log(tournaments);
   const [activeView, setActiveView] = useState(true);
+  const [showPast, setShowPast] = useState(false);
+  const [showFuture, setShowFuture] = useState(true);
+  const today = new Date();
+
+  const futureTournaments = tournaments.filter(
+    (t) => new Date(t.datum_von) >= today,
+  );
+  const pastTournaments = tournaments.filter(
+    (t) => new Date(t.datum_von) < today,
+  );
 
   return (
     <div className="">
@@ -49,12 +59,54 @@ export default function TurPageGbt() {
             )}
           </button>
         </div>
+
+        <button
+          onClick={() => setShowPast(!showPast)}
+          className="mt-4 px-4 py-2 rounded-lg"
+        >
+          {showPast ? (
+            <div className="flex flex-row bg-gray-800 rounded-lg p-2">
+              <ChevronDown />
+              <h2 className="text-xl font-bold ml-2">Vergangene Turniere</h2>
+            </div>
+          ) : (
+            <div className="flex flex-row p-2">
+              <ChevronUp />
+              <h2 className="text-xl font-bold ml-2">Vergangene Turniere</h2>
+            </div>
+          )}
+        </button>
         {/* Vergangene Turniere */}
-        {activeView && (
-          <TournamentGrid tournaments={tournaments} basePath="gbt" />
+        {showPast && activeView && (
+          <TournamentGrid tournaments={pastTournaments} basePath="gbt" />
         )}
-        {!activeView && (
-          <TournamentTable tournaments={tournaments} basePath="gbt" />
+        {showPast && !activeView && (
+          <TournamentTable tournaments={pastTournaments} basePath="gbt" />
+        )}
+
+        <button
+          onClick={() => setShowFuture(!showFuture)}
+          className="mt-4 px-4 py-2 rounded"
+        >
+          {showFuture ? (
+            <div className="flex flex-row bg-gray-800 rounded-lg p-2">
+              <ChevronDown />
+              <h2 className="text-xl font-bold ml-2">Aktuelle Turniere</h2>
+            </div>
+          ) : (
+            <div className="flex flex-row p-2">
+              <ChevronUp />
+              <h2 className="text-xl font-bold ml-2">Aktuelle Turniere</h2>
+            </div>
+          )}
+        </button>
+
+        {/* Aktuelle Turniere */}
+        {showFuture && activeView && (
+          <TournamentGrid tournaments={futureTournaments} basePath="dvv" />
+        )}
+        {showFuture && !activeView && (
+          <TournamentTable tournaments={futureTournaments} basePath="dvv" />
         )}
       </div>
     </div>

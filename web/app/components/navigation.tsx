@@ -32,10 +32,11 @@ export default function Navigation() {
     { to: "/", label: "Home", icon: Home },
     { to: "/tournaments", label: "Turniere", icon: Trophy },
     { to: "/rankings", label: "Ranglisten", icon: BarChart3 },
-    { to: "/", label: "Favouriten", icon: Star },
-    { to: "/search", label: "Suche", icon: Search },
-    { to: "/", label: "News", icon: NewspaperIcon },
-    { to: "/", label: "Einstellungen", icon: Settings },
+    // { to: "/", label: "Favouriten", icon: Star },
+    // { to: "/search", label: "Suche", icon: Search },
+    // { to: "/", label: "News", icon: NewspaperIcon },
+    // { to: "/", label: "Archiv", icon: NewspaperIcon },
+    // { to: "/", label: "Einstellungen", icon: Settings },
   ];
 
   const location = useLocation();
