@@ -9,6 +9,7 @@ interface TeamListProps {
   activeTab: string;
   displayKey?: keyof Team;
   showIndex?: boolean;
+  origin?: string;
 }
 
 export default function TeamList({
@@ -17,6 +18,7 @@ export default function TeamList({
   activeTab,
   displayKey,
   showIndex = true,
+  origin,
 }: TeamListProps) {
   const sortTeams = (tab: string) => {
     const sorted = [...teams];
@@ -49,6 +51,8 @@ export default function TeamList({
         showIndex = false;
         return sorted
           .filter((a) => a.status != "Absage")
+          .filter((a) => a.status != "Absage/Nachrücker")
+          .filter((a) => a.platzierung != null)
           .sort((a, b) => a.platzierung - b.platzierung);
 
       default:
@@ -66,7 +70,11 @@ export default function TeamList({
         {sortedTeams.map((team, i) => (
           <li key={team.id} className="border-b border-gray-700 p-2">
             <a
-              href={`https://www.beachvolleybb.de/popup/beach/beachTeamDetails.xhtml?beachTeamId=${team.external_mannschafts_id}&hideHistoryBackButton=true`}
+              href={
+                origin === "dvv"
+                  ? `https://beach.volleyball-verband.de/public/team.php?id=${team.external_mannschafts_id}`
+                  : `https://www.beachvolleybb.de/popup/beach/beachTeamDetails.xhtml?beachTeamId=${team.external_mannschafts_id}&hideHistoryBackButton=true`
+              }
               target="_blank"
               rel="noopener noreferrer"
               className="flex justify-between items-center p-2 hover:bg-gray-800 rounded-lg"

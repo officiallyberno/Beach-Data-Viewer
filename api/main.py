@@ -302,7 +302,7 @@ async def get_vvb_tournament_teams(tournament_id: int, db: AsyncSession = Depend
     result = await db.execute(
         select(TournamentTeam)
         .where(TournamentTeam.tournament_id == tournament_id)
-        .order_by(TournamentTeam.zulassung_reihenfolge.asc())
+        .order_by(TournamentTeam.mannschaftsname.asc())
     )
     return result.scalars().all()
 
