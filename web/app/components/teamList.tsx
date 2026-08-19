@@ -39,8 +39,8 @@ export default function TeamList({
           .sort((a: Team, b: Team) => {
             return a.zulassung_reihenfolge - b.zulassung_reihenfolge;
           });
-
       case "setzliste":
+      case "setzlisteHF":
         return sorted
           .filter((a) => a.status != "Absage")
           .sort((a: Team, b: Team) => {
@@ -48,6 +48,7 @@ export default function TeamList({
           });
 
       case "platzierungen":
+      case "platzierungenHF":
         showIndex = false;
         return sorted
           .filter((a) => a.status != "Absage")

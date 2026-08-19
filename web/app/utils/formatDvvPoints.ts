@@ -10,5 +10,7 @@ export function formatDvvPoints(input: string): string {
   // Ersetze "219L" → "219\nL"
   const formatted = input.replace(regex, "$1\n$2");
 
-  return formatted.trim();
+  const final = formatted.replace(".", "");
+
+  return final.trim();
 }

@@ -103,10 +103,10 @@ export default function TurPageGbt() {
 
         {/* Aktuelle Turniere */}
         {showFuture && activeView && (
-          <TournamentGrid tournaments={futureTournaments} basePath="dvv" />
+          <TournamentGrid tournaments={futureTournaments} basePath="gbt" />
         )}
         {showFuture && !activeView && (
-          <TournamentTable tournaments={futureTournaments} basePath="dvv" />
+          <TournamentTable tournaments={futureTournaments} basePath="gbt" />
         )}
       </div>
     </div>

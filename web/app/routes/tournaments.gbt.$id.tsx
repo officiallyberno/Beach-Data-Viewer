@@ -22,13 +22,20 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   return json({ teams, tournament });
 }
 
-const tabs = [
+const tabsOverview = [
   { key: "details", label: "Details" },
   { key: "meldeliste", label: "Meldeliste" },
   { key: "zulassung", label: "Zulassung" },
-  { key: "setzliste", label: "Setzliste" },
-  { key: "spiele", label: "Spiele" },
-  { key: "platzierungen", label: "Platzierungen" },
+];
+const tabsHf = [
+  { key: "setzlisteHF", label: "Setzliste", published: true },
+  { key: "spieleHF", label: "Spiele", published: true },
+  { key: "platzierungenHF", label: "Platzierungen", published: true },
+];
+const tabsQ = [
+  { key: "setzlisteQ", label: "Setzliste", published: true },
+  { key: "spieleQ", label: "Spiele", published: true },
+  { key: "platzierungenQ", label: "Platzierungen", published: true },
 ];
 
 export default function TournamentDetail() {
@@ -42,24 +49,88 @@ export default function TournamentDetail() {
   const teams_hf = teams.filter((team) => team.status == "Hauptfeld");
   const teams_q = teams.filter((team) => team.status == "Qualifikation");
   const teams_an = teams.filter((team) => team.status == "Absage/Nachrücker");
+  const teams_setzung = teams.filter(
+    (team) => team.setzung_reihenfolge != null,
+  );
+
+  // ToDo: Published verwenden, um Setzliste etc. erst zum gegebenen Zeitpunkt anzuzeigen
+  // const now = new Date();
+  // const ende = new Date(tournament.datum_von);
+
+  // const isTourFinal = now >= ende;
+
+  // const published = {
+  //   spiele: isTourFinal,
+  //   platzierungen: isTourFinal,
+  // };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
-      <div className="flex flex-wrap gap-2 mb-6">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2 rounded-lg transition
-              ${
-                activeTab === t.key
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap gap-x-8 gap-y-4">
+        {/* Allgemeine Informationen */}
+        <div className="flex-1 min-w-[220px]">
+          <p className="text-sm font-bold text-white mb-1">
+            Allgemeine Informationen
+          </p>
+
+          <div className="flex flex-wrap gap-2">
+            {tabsOverview.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`px-3 py-1.5 text-sm transition-colors ${
+                  activeTab === t.key
+                    ? "text-white font-medium border-b-2 border-white"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Qualifikation */}
+        <div className="flex-1 min-w-[220px]">
+          <p className="text-sm font-bold text-white mb-1">Qualifikation</p>
+
+          <div className="flex flex-wrap gap-2">
+            {tabsQ.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`px-3 py-1.5 text-sm transition-colors ${
+                  activeTab === t.key
+                    ? "text-white font-medium border-b-2 border-white"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Hauptfeld */}
+        <div className="flex-1 min-w-[220px]">
+          <p className="text-sm font-bold text-white mb-1">Hauptfeld</p>
+
+          <div className="flex flex-wrap gap-2">
+            {tabsHf.map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setActiveTab(t.key)}
+                className={`px-3 py-1.5 text-sm transition-colors ${
+                  activeTab === t.key
+                    ? "text-white font-medium border-b-2 border-white"
+                    : "text-gray-400 hover:text-gray-200"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
       {/* DetailSeiten */}
       <div className="mt-4">
@@ -121,10 +192,10 @@ export default function TournamentDetail() {
           </section>
         )}
 
-        {activeTab === "setzliste" && (
+        {activeTab === "setzlisteQ" && (
           <section>
             <TeamList
-              teams={teams_hf}
+              teams={teams_setzung}
               title="Setzliste"
               activeTab={activeTab}
               displayKey="punkte_setzung"
@@ -133,7 +204,7 @@ export default function TournamentDetail() {
           </section>
         )}
 
-        {activeTab === "spiele" && (
+        {activeTab === "spieleQ" && (
           <section>
             <h2 className="text-2xl font-bold mb-4 text-center">
               Achtelfinale Winner
@@ -152,7 +223,49 @@ export default function TournamentDetail() {
           </section>
         )}
 
-        {activeTab === "platzierungen" && (
+        {activeTab === "platzierungenQ" && (
+          <section>
+            <TeamList
+              teams={teams}
+              title="Platzierungen"
+              activeTab={activeTab}
+              displayKey="punkte_pro_spieler"
+              origin="dvv"
+            />
+          </section>
+        )}
+        {activeTab === "setzlisteHF" && (
+          <section>
+            <TeamList
+              teams={teams_setzung}
+              title="Setzliste"
+              activeTab={activeTab}
+              displayKey="punkte_setzung"
+              origin="dvv"
+            />
+          </section>
+        )}
+
+        {activeTab === "spieleHF" && (
+          <section>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Achtelfinale Winner
+            </h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Achtelfinale Loser
+            </h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Viertelfinale Winner
+            </h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Viertelfinale Loser
+            </h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">Halbfinale</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center">Finale</h2>
+          </section>
+        )}
+
+        {activeTab === "platzierungenHF" && (
           <section>
             <TeamList
               teams={teams}
